@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora Morfo 2</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: auto;
+      padding: 20px;
+      background: #f4f4f9;
+    }
+    h2, h3 {
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      background: #007BFF;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:hover { background: #0056b3; }
+    .resultado {
+      margin-top: 30px;
+      background: white;
+      border-left: 5px solid #007BFF;
+      padding: 15px;
+      white-space: pre-wrap;
+    }
+    a {
+      display: inline-block;
+      margin-top: 20px;
+      text-decoration: none;
+      color: #333;
+    }
+    hr {
+      margin: 40px 0;
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html">&larr; Voltar ao menu</a>
+  <h2>🖩 Calculadora – MORFO 2</h2>
+  <p>Escolha <b>apenas um modo</b> para preencher: Simplificado <b>ou</b> Detalhado.</p>
+
+  <!-- MODO SIMPLIFICADO -->
+  <h3>Modo Simplificado (insira diretamente as notas dos módulos)</h3>
+  <label>Nota Módulo 1 – Respiratório (NP1)</label>
+  <input type="number" step="0.01" id="simp_mod1" placeholder="Ex: 7.2">
+  <label>Nota Módulo 2 – Circulatório / Hemato / Imuno (NP2)</label>
+  <input type="number" step="0.01" id="simp_mod2" placeholder="Ex: 8.0">
+  <label>Nota Módulo 3 – Endócrino / Urogenital (NP3)</label>
+  <input type="number" step="0.01" id="simp_mod3" placeholder="Ex: 7.5">
+  <label>Projeto INTEGRADOR</label>
+  <input type="number" step="0.01" id="simp_ai" placeholder="Ex: 9.0">
+
+  <button onclick="calcularSimplificado()">Calcular (Modo Simplificado)</button>
+
+  <hr>
+
+  <!-- MODO DETALHADO -->
+  <h3>Modo Detalhado (com todas as subnotas)</h3>
+
+  <!-- Módulo 1 -->
+  <h4>Módulo 1 – Respiratório</h4>
+  <label>Nota Teórica</label>
+  <input type="number" step="0.01" id="mod1_teo" placeholder="Ex: 6.2">
+  <label>Nota Prática de Anatomia</label>
+  <input type="number" step="0.01" id="mod1_prat" placeholder="Ex: 5.5">
+
+  <!-- Módulo 2a -->
+  <h4>Módulo 2a – Circulatório</h4>
+  <label>Nota Teórica</label>
+  <input type="number" step="0.01" id="mod2a_teo" placeholder="Ex: 7.0">
+  <label>Nota Prática de Anatomia</label>
+  <input type="number" step="0.01" id="mod2a_prat" placeholder="Ex: 6.0">
+
+  <!-- Módulo 2b -->
+  <h4>Módulo 2b – Hematologia / Imunologia</h4>
+  <label>Nota Teórica</label>
+  <input type="number" step="0.01" id="mod2b_teo" placeholder="Ex: 8.0">
+
+  <!-- Módulo 3 -->
+  <h4>Módulo 3 – Endócrino / Urogenital</h4>
+  <label>Nota Teórica</label>
+  <input type="number" step="0.01" id="mod3_teo" placeholder="Ex: 7.5">
+  <label>Nota Prática de Anatomia</label>
+  <input type="number" step="0.01" id="mod3_prat" placeholder="Ex: 6.5">
+  <label>Nota Trabalho FisioEndócrino</label>
+  <input type="number" step="0.01" id="mod3_trab" placeholder="Ex: 9.5">
+
+  <!-- Atividade de Integração -->
+  <h4>Projeto INTEGRADOR</h4>
+  <label>Nota</label>
+  <input type="number" step="0.01" id="ai" placeholder="Ex: 9.0">
+
+  <button onclick="calcularDetalhado()">Calcular (Modo Detalhado)</button>
+
+  <button style="background:#6c757d" onclick="limparCampos()"> Limpar Tudo</button>
+
+  <div id="resultado" class="resultado" style="display:none;"></div>
+
+  <script>
+    function camposPreenchidos(ids) {
+      return ids.some(id => document.getElementById(id).value.trim() !== "");
+    }
+
+    function limparCampos() {
+      document.querySelectorAll("input").forEach(i => i.value = "");
+      document.getElementById("resultado").style.display = "none";
+    }
+
+    function calcularSimplificado() {
+      const detalhados = ["mod1_teo","mod1_prat","mod2a_teo","mod2a_prat","mod2b_teo","mod3_teo","mod3_prat","mod3_trab","ai"];
+      if (camposPreenchidos(detalhados)) {
+        alert("⚠️ Você preencheu campos do modo detalhado. Use apenas um modo por vez!");
+        return;
+      }
+
+      const np1 = parseFloat(document.getElementById("simp_mod1").value) || 0;
+      const np2 = parseFloat(document.getElementById("simp_mod2").value) || 0;
+      const np3 = parseFloat(document.getElementById("simp_mod3").value) || 0;
+      const ai = parseFloat(document.getElementById("simp_ai").value) || 0;
+
+      const nf = (np1*2.9 + np2*2.8 + np3*3.3 + ai*1.0)/10;
+
+      mostrarResultado(np1, np2, np3, ai, nf);
+    }
+
+    function calcularDetalhado() {
+      const simples = ["simp_mod1","simp_mod2","simp_mod3","simp_ai"];
+      if (camposPreenchidos(simples)) {
+        alert("⚠️ Você preencheu campos do modo simplificado. Use apenas um modo por vez!");
+        return;
+      }
+
+      // Módulo 1
+      const mod1Teo = parseFloat(document.getElementById("mod1_teo").value) || 0;
+      const mod1Prat = parseFloat(document.getElementById("mod1_prat").value) || 0;
+      const np1 = mod1Teo*0.741379 + mod1Prat*0.258620; // prática = metade da anatomia (ajuste original)
+
+      // Módulo 2a
+      const mod2aTeo = parseFloat(document.getElementById("mod2a_teo").value) || 0;
+      const mod2aPrat = parseFloat(document.getElementById("mod2a_prat").value) || 0;
+      const np2a = mod2aTeo*0.52 + mod2aPrat*0.14;
+
+      // Módulo 2b (sem prática)
+      const mod2bTeo = parseFloat(document.getElementById("mod2b_teo").value) || 0;
+      const np2b = mod2bTeo*0.34;
+
+      const np2 = np2a + np2b; // módulo 2 é soma dos dois blocos
+
+      // Módulo 3
+      const mod3Teo = parseFloat(document.getElementById("mod3_teo").value) || 0;
+      const mod3Prat = parseFloat(document.getElementById("mod3_prat").value) || 0;
+      const mod3Trab = parseFloat(document.getElementById("mod3_trab").value) || 0;
+      const np3 = mod3Teo*0.605 + mod3Trab*0.25 + mod3Prat*0.145;
+
+      const ai = parseFloat(document.getElementById("ai").value) || 0;
+
+      const nf = (np1*2.9 + np2*2.8 + np3*3.3 + ai*1.0)/10;
+
+      mostrarResultado(np1, np2, np3, ai, nf);
+    }
+
+    function mostrarResultado(np1, np2, np3, ai, nf) {
+      let texto = `🦎 Resultados:\n\n`;
+      texto += `Módulo 1 – Respiratório (NP1): ${np1.toFixed(2)}\n`;
+      texto += `Módulo 2 – Circulatório / Hemato / Imuno (NP2): ${np2.toFixed(2)}\n`;
+      texto += `Módulo 3 – Endócrino / Urogenital (NP3): ${np3.toFixed(2)}\n`;
+      texto += `Atividade de Integração: ${ai.toFixed(2)}\n\n`;
+      texto += `🇧🇷 Nota Final (NF): ${nf.toFixed(2)}`;
+
+      const div = document.getElementById("resultado");
+      div.style.display = "block";
+      div.textContent = texto;
+      div.scrollIntoView({behavior:"smooth"});
+    }
+  </script>
+</body>
+</html>
+

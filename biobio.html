@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calculadora Bioquímica/Biofísica</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: auto; padding: 20px; background: #f4f4f9; }
+    h2 { text-align: center; font-size: 1.8em; }
+    label { display: block; margin-top: 15px; font-weight: bold; }
+    input { width: 100%; padding: 8px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; font-size: 1em; }
+    button { margin-top: 20px; padding: 12px 24px; font-size: 16px; border: none; background: #007BFF; color: white; border-radius: 4px; cursor: pointer; width: 100%; }
+    button:hover { background: #0056b3; }
+    .resultado { margin-top: 30px; background: white; border-left: 5px solid #007BFF; padding: 15px; white-space: pre-wrap; font-size: 1em; }
+    a { display: inline-block; margin-top: 20px; text-decoration: none; color: #333; font-size: 1em; }
+    @media (max-width: 768px) {
+      body { padding: 15px; }
+      h2 { font-size: 1.5em; }
+      input { font-size: 1.1em; }
+      button { font-size: 1.2em; padding: 15px; }
+      .resultado { font-size: 1.1em; }
+      a { font-size: 1.1em; }
+    }
+  </style>
+</head>
+<body>
+  <a href="semestre1.html">&larr; Voltar ao menu</a>
+  <h2>⚗️ Calculadora – BIOBIO (Parcial)</h2>
+  <p>Preencha as notas que já tem. A calculadora mostra média parcial e quanto falta para cada menção.</p>
+
+  <label>Nota Prova 1 (peso 45%)</label>
+  <input type="number" step="0.01" id="p1" placeholder="Ex: 7.5">
+
+  <label>Nota Prova 2 (peso 45%)</label>
+  <input type="number" step="0.01" id="p2" placeholder="Ex: 6.8">
+
+  <label>Projeto Integrador (peso 10%)</label>
+  <input type="number" step="0.01" id="projeto" placeholder="Ex: 9.0">
+
+  <button onclick="calcularBiobio()">Calcular Nota</button>
+
+  <div id="resultado" class="resultado" style="display:none;"></div>
+
+  <script>
+    function calcularBiobio() {
+      const pesos = { p1: 0.45, p2: 0.45, projeto: 0.10 };
+
+      let somaPesos = 0;
+      let somaNotas = 0;
+
+      for (const key of ["p1", "p2"]) {
+        const val = parseFloat(document.getElementById(key).value);
+        if (!isNaN(val)) {
+          somaPesos += pesos[key];
+          somaNotas += val * pesos[key];
+        }
+      }
+
+      const projeto = parseFloat(document.getElementById("projeto").value);
+      const projetoValido = !isNaN(projeto);
+      if (projetoValido) {
+        somaPesos += pesos.projeto;
+        somaNotas += projeto * pesos.projeto;
+      }
+
+      if (somaPesos === 0) {
+        alert("Por favor, preencha pelo menos uma nota.");
+        return;
+      }
+
+      const nfParcial = somaNotas;
+      const restantePeso = 1 - somaPesos;
+
+      let texto = `Nota final parcial (NF): ${nfParcial.toFixed(2)}\n\n`;
+
+      const metas = [
+        { nome: "MM (5,0)", alvo: 5.0 },
+        { nome: "MS (7,0)", alvo: 7.0 },
+        { nome: "SS (9,0)", alvo: 9.0 }
+      ];
+
+      if (restantePeso > 0) {
+        metas.forEach(meta => {
+          const falta = (meta.alvo - nfParcial) / restantePeso;
+          if (falta <= 0) {
+            texto += `✅ Já atingiu ${meta.nome}\n`;
+          } else if (falta > 10) {
+            texto += `❌ Mesmo tirando 10 no restante, não atinge ${meta.nome}\n`;
+          } else {
+            texto += `🔹 Precisa média ${falta.toFixed(2)} no restante para ${meta.nome}\n`;
+          }
+        });
+      } else {
+        metas.forEach(meta => {
+          if (nfParcial >= meta.alvo) {
+            texto += `✅ Já atingiu ${meta.nome}\n`;
+          } else {
+            texto += `❌ Não atingiu ${meta.nome}\n`;
+          }
+        });
+      }
+
+      const div = document.getElementById("resultado");
+      div.style.display = "block";
+      div.textContent = texto;
+      div.scrollIntoView({ behavior: "smooth" });
+    }
+  </script>
+</body>
+</html>
+

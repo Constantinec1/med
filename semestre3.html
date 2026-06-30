@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadoras – 3º Semestre</title>
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: radial-gradient(circle at top, #17233d 0%, #070b14 55%, #03050a 100%);
+    color: #f5f7fb;
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  header h1 {
+    margin: 0;
+    font-size: 2.2rem;
+    letter-spacing: 1px;
+  }
+
+  header p {
+    color: #aeb8d0;
+    margin-top: 8px;
+  }
+
+  .dashboard {
+    max-width: 1100px;
+    margin: auto;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 18px;
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    min-height: 160px;
+    padding: 20px;
+    cursor: pointer;
+    transition: 0.25s;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    border-color: #55d6ff;
+    box-shadow: 0 0 22px rgba(85,214,255,0.25);
+  }
+
+  .card span {
+    font-size: 2.2rem;
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .card strong {
+    font-size: 1.05rem;
+  }
+
+  .panel {
+    display: none;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 22px;
+    padding: 22px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+  }
+
+  .panel.active {
+    display: block;
+  }
+
+  .panel h2 {
+    margin-top: 0;
+    color: #55d6ff;
+  }
+
+  .section {
+    background: rgba(0,0,0,0.22);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  label {
+    display: block;
+    margin-top: 12px;
+    color: #dce6ff;
+    font-weight: bold;
+  }
+
+  input {
+    width: 100%;
+    margin-top: 6px;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-size: 1rem;
+    
+  }
+
+  button {
+    width: 100%;
+    padding: 14px;
+    border: 0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #1da1ff, #7c4dff);
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+    margin-top: 18px;
+    cursor: pointer;
+  }
+
+  .resultado {
+    display: none;
+    margin-top: 20px;
+    background: rgba(0,0,0,0.35);
+    border-left: 5px solid #55d6ff;
+    border-radius: 14px;
+    padding: 16px;
+    white-space: pre-wrap;
+  }
+
+  .bar {
+    height: 18px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 999px;
+    overflow: hidden;
+    margin: 12px 0;
+  }
+
+  .bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #ff4d6d, #ffd166, #06d6a0, #55d6ff);
+    transition: 0.4s;
+  }
+
+  .placeholder {
+    text-align: center;
+    color: #aeb8d0;
+    padding: 30px;
+  }
+
+  @media (max-width: 700px) {
+    body {
+      padding: 14px;
+    }
+
+    header h1 {
+      font-size: 1.7rem;
+    }
+
+    .cards {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .card {
+      min-height: auto;
+      aspect-ratio: 1 / 1;
+      padding: 8px;
+    }
+
+    .card span {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .card strong {
+      font-size: 0.95rem;
+    }
+
+    .panel {
+      padding: 16px;
+    }
+  }
+
+  /* Remove setinhas dos inputs number */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🧪 Calculadoras – 3º Semestre</h1>
+  <p>Calculadoras de nota + projeção de menção</p>
+</header>
+
+<div class="dashboard">
+
+  <div class="cards">
+    <div class="card" onclick="abrirPainel('morfo3')">
+      <span>🫃</span>
+      <strong>Morfo 3</strong>
+    </div>
+
+    <div class="card" onclick="abrirPainel('imuno')">
+      <span>🛡️</span>
+      <strong>Imunologia</strong>
+    </div>
+
+    <div class="card" onclick="abrirPainel('micro')">
+      <span>🦠</span>
+      <strong>Microbiologia</strong>
+    </div>
+
+    <div class="card" onclick="abrirPainel('patoteorica')">
+      <span>🧫</span>
+      <strong>Patologia Teórica</strong>
+    </div>
+
+    <div class="card" onclick="abrirPainel('patopratica')">
+      <span>🔬</span>
+      <strong>Patologia Prática</strong>
+    </div>
+
+    <div class="card" onclick="abrirPainel('parasito')">
+      <span>🪱</span>
+      <strong>Parasitologia</strong>
+    </div>
+  </div>
+
+  <!-- MORFO 3 -->
+  <div id="morfo3" class="panel active">
+    <h2>🫃 Morfo 3</h2>
+
+
+    <div class="section">
+      <h3>NP1 – Morfologia do Sistema Digestório</h3>
+      <label>Prova Histologia/Embriologia – PHE (peso 4)</label>
+      <input type="number" id="phe" step="0.01" placeholder="Ex: 8.0">
+
+      <label>Prova Teórica Anatomia – PTA (peso 4)</label>
+      <input type="number" id="pta" step="0.01" placeholder="Ex: 7.5">
+
+      <label>Prova Prática Anatomia – PPA (peso 2)</label>
+      <input type="number" id="ppa" step="0.01" placeholder="Ex: 9.0">
+    </div>
+
+    <div class="section">
+      <h3>NP2 – Fisiologia Digestória</h3>
+      <label>Nota de Fisiologia</label>
+      <input type="number" id="np2" step="0.01" placeholder="Ex: 7.0">
+    </div>
+
+    <div class="section">
+      <h3>NP3 – Dissecação</h3>
+      <label>Relatório de Dissecação (3 pontos)</label>
+      <input type="number" id="relatorio" step="0.01" placeholder="Ex: até 3,0">
+
+      <label>Atividade Prática Individual (7 pontos)</label>
+      <input type="number" id="pratica" step="0.01" placeholder="Ex: até 7,0">
+    </div>
+
+    <div class="section">
+      <h3>NP4 – Atividade Integradora</h3>
+      <label>Nota da Integradora</label>
+      <input type="number" id="np4" step="0.01" placeholder="Ex: 9.0">
+    </div>
+
+    <button onclick="calcularMorfo3()">Calcular Morfo 3</button>
+
+    <div id="resultadoMorfo3" class="resultado"></div>
+  </div>
+
+  <!-- IMUNOLOGIA -->
+  <div id="imuno" class="panel">
+    <h2>🛡️ Imunologia</h2>
+
+
+    <div class="section">
+      <h3>Provas Teóricas</h3>
+      <label>Prova Teórica 1</label>
+      <input type="number" id="im_t1" step="0.01" placeholder="Ex: 7.5">
+      <label>Prova Teórica 2</label>
+      <input type="number" id="im_t2" step="0.01" placeholder="Ex: 8.0">
+      <label>Prova Teórica 3</label>
+      <input type="number" id="im_t3" step="0.01" placeholder="Ex: 6.8">
+    </div>
+
+    <div class="section">
+      <h3>Provas Práticas</h3>
+      <label>Prática 1 – Nota final da prática (prova + presença, até 10 pontos)</label>
+      <input type="number" id="im_p1" step="0.01" placeholder="Ex: 9.5">
+      <label>Prática 2 – Nota final da prática (prova + presença, até 10 pontos)</label>
+      <input type="number" id="im_p2" step="0.01" placeholder="Ex: 9.0">
+    </div>
+
+    <div class="section">
+      <h3>Atividades</h3>
+      <label>Atividade de Extensão</label>
+      <input type="number" id="im_ext" step="0.01" placeholder="Ex: 9.0">
+      <label>Atividade Sociocultural</label>
+      <input type="number" id="im_soc" step="0.01" placeholder="Ex: 10.0">
+      <label>Atividade Integradora</label>
+      <input type="number" id="im_int" step="0.01" placeholder="Ex: 8.5">
+    </div>
+
+    <button onclick="calcularImuno()">Calcular Imunologia</button>
+    <div id="resultadoImuno" class="resultado"></div>
+  </div>
+
+  <!-- MICROBIOLOGIA -->
+  <div id="micro" class="panel">
+    <h2>🦠 Microbiologia</h2>
+
+
+    <div class="section">
+      <h3>Avaliações</h3>
+      <label>Prova Teórica 1</label>
+      <input type="number" id="mi_p1" step="0.01" placeholder="Ex: 7.5">
+      <label>Prova Teórica 2</label>
+      <input type="number" id="mi_p2" step="0.01" placeholder="Ex: 8.0">
+      <label>Atividades de Fixação</label>
+      <input type="number" id="mi_fix" step="0.01" placeholder="Ex: 9.0">
+      <label>Atividade de Extensão</label>
+      <input type="number" id="mi_ext" step="0.01" placeholder="Ex: 9.0">
+      <label>Atividade Integradora</label>
+      <input type="number" id="mi_int" step="0.01" placeholder="Ex: 8.5">
+    </div>
+
+    <button onclick="calcularMicro()">Calcular Microbiologia</button>
+    <div id="resultadoMicro" class="resultado"></div>
+  </div>
+
+  <!-- PATOLOGIA TEÓRICA -->
+  <div id="patoteorica" class="panel">
+    <h2>🧫 Patologia Teórica</h2>
+
+
+    <div class="section">
+      <h3>Avaliações</h3>
+      <label>Avaliação 1 – Módulos 1 e 2</label>
+      <input type="number" id="pt_p1" step="0.01" placeholder="Ex: 7.0">
+      <label>Avaliação 2 – Módulos 3 e 4</label>
+      <input type="number" id="pt_p2" step="0.01" placeholder="Ex: 8.0">
+      <label>Atividade Integradora</label>
+      <input type="number" id="pt_ai" step="0.01" placeholder="Ex: 9.0">
+    </div>
+
+    <button onclick="calcularPatoTeorica()">Calcular Patologia Teórica</button>
+    <div id="resultadoPatoTeorica" class="resultado"></div>
+  </div>
+
+  <!-- PATOLOGIA PRÁTICA -->
+  <div id="patopratica" class="panel">
+    <h2>🔬 Patologia Prática</h2>
+
+
+    <div class="section">
+      <h3>Avaliações</h3>
+      <label>Avaliação Prática 1 – Módulos 1 e 2 Some 9 da prova e 1 do relatorio</label>
+      <input type="number" id="pp_p1" step="0.01" placeholder="Até 9 da prova e 1 do relatorio">
+      <label>Avaliação Prática 2 – Módulos 3 e 4 Some 9 da prova e 1 do relatorio</label>
+      <input type="number" id="pp_p2" step="0.01" placeholder="Até 9 da prova e 1 do relatorio">
+    </div>
+
+    <button onclick="calcularPatoPratica()">Calcular Patologia Prática</button>
+    <div id="resultadoPatoPratica" class="resultado"></div>
+  </div>
+
+  <!-- PARASITOLOGIA -->
+  <div id="parasito" class="panel">
+    <h2>🪱 Parasitologia</h2>
+
+
+    <div class="section">
+      <h3>Avaliações Teóricas – AT (45%)</h3>
+      <label>1ª Avaliação Teórica – Protozoologia e Vetores</label>
+      <input type="number" id="pa_t1" step="0.01" placeholder="Ex: 7.5">
+      <label>2ª Avaliação Teórica – Helmintos e Ectoparasitos</label>
+      <input type="number" id="pa_t2" step="0.01" placeholder="Ex: 8.0">
+    </div>
+
+    <div class="section">
+      <h3>Avaliações Práticas – AP (15%)</h3>
+      <label>1ª Avaliação Prática</label>
+      <input type="number" id="pa_p1" step="0.01" placeholder="Ex: 8.5">
+      <label>2ª Avaliação Prática</label>
+      <input type="number" id="pa_p2" step="0.01" placeholder="Ex: 7.0">
+    </div>
+
+    <div class="section">
+      <h3>Discussão de Casos Clínicos – CC (20%)</h3>
+      <label>Caso Clínico 1</label>
+      <input type="number" id="pa_cc1" step="0.01" placeholder="Ex: 9.0">
+      <label>Caso Clínico 2</label>
+      <input type="number" id="pa_cc2" step="0.01" placeholder="Ex: 8.0">
+      <label>Caso Clínico 3</label>
+      <input type="number" id="pa_cc3" step="0.01" placeholder="Ex: 8.5">
+      <label>Caso Clínico 4</label>
+      <input type="number" id="pa_cc4" step="0.01" placeholder="Ex: 9.5">
+    </div>
+
+    <div class="section">
+      <h3>Outras Atividades</h3>
+      <label>Trabalho de Extensão – TE (10%)</label>
+      <input type="number" id="pa_ext" step="0.01" placeholder="Ex: 9.0">
+      <label>Atividade Integradora – AI (10%)</label>
+      <input type="number" id="pa_ai" step="0.01" placeholder="Ex: 8.5">
+    </div>
+
+    <button onclick="calcularParasito()">Calcular Parasitologia</button>
+    <div id="resultadoParasito" class="resultado"></div>
+  </div>
+
+</div>
+
+<script>
+function abrirPainel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+
+  const painel = document.getElementById(id);
+  painel.classList.add('active');
+
+  setTimeout(() => {
+    painel.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }, 100);
+}
+
+function valor(id) {
+  const v = parseFloat(document.getElementById(id).value);
+  return isNaN(v) ? null : v;
+}
+
+function mencao(nf) {
+  if (nf >= 9) return "SS";
+  if (nf >= 7) return "MS";
+  if (nf >= 5) return "MM";
+  return "MI/II";
+}
+
+function calcularMorfo3() {
+  const phe = valor("phe");
+  const pta = valor("pta");
+  const ppa = valor("ppa");
+  const np2 = valor("np2");
+  const relatorio = valor("relatorio");
+  const pratica = valor("pratica");
+  const np4 = valor("np4");
+
+  // NP1 completa = PHE*0.4 + PTA*0.4 + PPA*0.2
+  // Para projeção, cada parte precisa contar separadamente:
+  // PHE = peso 2,0 na NF | PTA = peso 2,0 | PPA = peso 1,0
+  let np1 = null;
+  if (phe !== null || pta !== null || ppa !== null) {
+    np1 = ((phe || 0) * 0.4) + ((pta || 0) * 0.4) + ((ppa || 0) * 0.2);
+  }
+
+  // NP3 = relatório (0 a 3) + prática individual (0 a 7)
+  // Para projeção, normalizamos relatório/prática para escala 0–10:
+  // relatório = 30% da NP3 -> peso 0,6 na NF
+  // prática = 70% da NP3 -> peso 1,4 na NF
+  let np3 = null;
+  if (relatorio !== null || pratica !== null) {
+    np3 = (relatorio || 0) + (pratica || 0);
+  }
+
+  const componentes = [
+    { nome: "PHE – Histologia/Embriologia", valor: phe, peso: 2.0, tipo: "nota10" },
+    { nome: "PTA – Teórica Anatomia", valor: pta, peso: 2.0, tipo: "nota10" },
+    { nome: "PPA – Prática Anatomia", valor: ppa, peso: 1.0, tipo: "nota10" },
+    { nome: "NP2 – Fisiologia", valor: np2, peso: 2.0, tipo: "nota10" },
+    { nome: "Relatório de Dissecação", valor: relatorio !== null ? (relatorio / 3) * 10 : null, peso: 0.6, tipo: "relatorio" },
+    { nome: "Atividade Prática Individual", valor: pratica !== null ? (pratica / 7) * 10 : null, peso: 1.4, tipo: "pratica" },
+    { nome: "NP4 – Integradora", valor: np4, peso: 1.0, tipo: "nota10" }
+  ];
+
+  let soma = 0;
+  let pesoPreenchido = 0;
+  let faltantes = [];
+
+  componentes.forEach(item => {
+    if (item.valor !== null) {
+      soma += item.valor * item.peso;
+      pesoPreenchido += item.peso;
+    } else {
+      faltantes.push(item);
+    }
+  });
+
+  if (pesoPreenchido === 0) {
+    alert("Preencha pelo menos uma nota.");
+    return;
+  }
+
+  const nfParcial = soma / 10;
+  const pesoRestante = (10 - pesoPreenchido) / 10;
+
+  let texto = `📌 Resultado Morfo 3\n\n`;
+
+  texto += `NP1 – Morfologia: ${np1 !== null ? np1.toFixed(2) : "—"}\n`;
+  texto += `NP2 – Fisiologia: ${np2 !== null ? np2.toFixed(2) : "—"}\n`;
+  texto += `NP3 – Dissecação: ${np3 !== null ? np3.toFixed(2) : "—"}\n`;
+  texto += `NP4 – Integradora: ${np4 !== null ? np4.toFixed(2) : "—"}\n\n`;
+
+  texto += `Nota Final parcial: ${nfParcial.toFixed(2)}\n`;
+  texto += `Menção atual: ${mencao(nfParcial)}\n\n`;
+
+  texto += `📈 Projeções:\n`;
+
+  const metas = [
+    { nome: "MM", alvo: 5 },
+    { nome: "MS", alvo: 7 },
+    { nome: "SS", alvo: 9 }
+  ];
+
+  if (faltantes.length === 0) {
+    texto += `Todas as notas foram preenchidas.\n`;
+  } else {
+    metas.forEach(meta => {
+      const necessario = (meta.alvo - nfParcial) / pesoRestante;
+
+      if (necessario <= 0) {
+        texto += `✅ ${meta.nome}: já atingido.\n`;
+      } else if (necessario > 10) {
+        texto += `❌ ${meta.nome}: impossível mesmo tirando 10 no restante, mas quem sabe n surge um pontinho extra.\n`;
+      } else {
+        texto += `🔹 Para ${meta.nome}, precisa em média ${necessario.toFixed(2)} nas partes faltantes:\n`;
+        faltantes.forEach(f => {
+          if (f.tipo === "relatorio") {
+            texto += `   - ${f.nome}: ${(necessario * 0.3).toFixed(2)} de 3,0\n`;
+          } else if (f.tipo === "pratica") {
+            texto += `   - ${f.nome}: ${(necessario * 0.7).toFixed(2)} de 7,0\n`;
+          } else {
+            texto += `   - ${f.nome}: ${necessario.toFixed(2)}\n`;
+          }
+        });
+      }
+    });
+  }
+
+  const div = document.getElementById("resultadoMorfo3");
+  div.style.display = "block";
+  div.textContent = texto;
+  div.scrollIntoView({ behavior: "smooth" });
+}
+
+function calcularGenerico(titulo, itens, divId) {
+  let soma = 0;
+  let pesoPreenchido = 0;
+  const faltantes = [];
+
+  itens.forEach(item => {
+    if (item.valor !== null) {
+      soma += item.valor * item.peso;
+      pesoPreenchido += item.peso;
+    } else {
+      faltantes.push(item);
+    }
+  });
+
+  if (pesoPreenchido === 0) {
+    alert("Preencha pelo menos uma nota.");
+    return;
+  }
+
+  const nfParcial = soma / 10;
+  const pesoRestante = (10 - pesoPreenchido) / 10;
+
+  let texto = `📌 Resultado ${titulo}\n\n`;
+  itens.forEach(item => {
+    texto += `${item.nome}: ${item.valor !== null ? item.valor.toFixed(2) : "—"}\n`;
+  });
+  texto += `\nNota Final parcial: ${nfParcial.toFixed(2)}\n`;
+  texto += `Menção atual: ${mencao(nfParcial)}\n\n`;
+  texto += `📈 Projeções:\n`;
+
+  const metas = [
+    { nome: "MM", alvo: 5 },
+    { nome: "MS", alvo: 7 },
+    { nome: "SS", alvo: 9 }
+  ];
+
+  if (faltantes.length === 0) {
+    texto += `Todas as notas foram preenchidas.\n`;
+  } else {
+    metas.forEach(meta => {
+      const necessario = (meta.alvo - nfParcial) / pesoRestante;
+
+      if (necessario <= 0) {
+        texto += `✅ ${meta.nome}: já atingido.\n`;
+      } else if (necessario > 10) {
+        texto += `❌ ${meta.nome}: impossível mesmo tirando 10 no restante, mas quem sabe n surge um pontinho extra.\n`;
+      } else {
+        texto += `🔹 Para ${meta.nome}, precisa média ${necessario.toFixed(2)} nas partes faltantes:\n`;
+        faltantes.forEach(f => {
+          texto += `   - ${f.nome}: ${necessario.toFixed(2)}\n`;
+        });
+      }
+    });
+  }
+
+  const div = document.getElementById(divId);
+  div.style.display = "block";
+  div.textContent = texto;
+  div.scrollIntoView({ behavior: "smooth" });
+}
+
+function calcularImuno() {
+  calcularGenerico("Imunologia", [
+    { nome: "Teórica 1", valor: valor("im_t1"), peso: 6.5 / 3 },
+    { nome: "Teórica 2", valor: valor("im_t2"), peso: 6.5 / 3 },
+    { nome: "Teórica 3", valor: valor("im_t3"), peso: 6.5 / 3 },
+    { nome: "Prática 1", valor: valor("im_p1"), peso: 0.75 },
+    { nome: "Prática 2", valor: valor("im_p2"), peso: 0.75 },
+    { nome: "Extensão", valor: valor("im_ext"), peso: 0.5 },
+    { nome: "Sociocultural", valor: valor("im_soc"), peso: 0.5 },
+    { nome: "Integradora", valor: valor("im_int"), peso: 1.0 }
+  ], "resultadoImuno");
+}
+
+function calcularMicro() {
+  calcularGenerico("Microbiologia", [
+    { nome: "Prova 1", valor: valor("mi_p1"), peso: 3.75 },
+    { nome: "Prova 2", valor: valor("mi_p2"), peso: 3.75 },
+    { nome: "Fixação", valor: valor("mi_fix"), peso: 1.0 },
+    { nome: "Extensão", valor: valor("mi_ext"), peso: 0.5 },
+    { nome: "Integradora", valor: valor("mi_int"), peso: 1.0 }
+  ], "resultadoMicro");
+}
+
+function calcularPatoTeorica() {
+  calcularGenerico("Patologia Teórica", [
+    { nome: "Avaliação 1", valor: valor("pt_p1"), peso: 4.5 },
+    { nome: "Avaliação 2", valor: valor("pt_p2"), peso: 4.5 },
+    { nome: "Integradora", valor: valor("pt_ai"), peso: 1.0 }
+  ], "resultadoPatoTeorica");
+}
+
+function calcularPatoPratica() {
+  calcularGenerico("Patologia Prática", [
+    { nome: "Avaliação Prática 1", valor: valor("pp_p1"), peso: 5.0 },
+    { nome: "Avaliação Prática 2", valor: valor("pp_p2"), peso: 5.0 } ], "resultadoPatoPratica");
+}
+
+function calcularParasito() {
+  calcularGenerico("Parasitologia", [
+    { nome: "Avaliação Teórica 1", valor: valor("pa_t1"), peso: 2.25 },
+    { nome: "Avaliação Teórica 2", valor: valor("pa_t2"), peso: 2.25 },
+    { nome: "Avaliação Prática 1", valor: valor("pa_p1"), peso: 0.75 },
+    { nome: "Avaliação Prática 2", valor: valor("pa_p2"), peso: 0.75 },
+    { nome: "Caso Clínico 1", valor: valor("pa_cc1"), peso: 0.5 },
+    { nome: "Caso Clínico 2", valor: valor("pa_cc2"), peso: 0.5 },
+    { nome: "Caso Clínico 3", valor: valor("pa_cc3"), peso: 0.5 },
+    { nome: "Caso Clínico 4", valor: valor("pa_cc4"), peso: 0.5 },
+    { nome: "Trabalho de Extensão", valor: valor("pa_ext"), peso: 1.0 },
+    { nome: "Atividade Integradora", valor: valor("pa_ai"), peso: 1.0 }
+  ], "resultadoParasito");
+}
+
+</script>
+
+</body>
+</html>

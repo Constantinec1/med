@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prática de Patologia – Módulos 3 e 4</title>
+<style>
+:root {--bg:#08111f;--card:#111827;--text:#f9fafb;--muted:#cbd5e1;--accent:#22c55e;--accent2:#38bdf8;--wrong:#ef4444;--border:#334155;}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at top,#1e3a5f,var(--bg));color:var(--text);line-height:1.5}
+header{padding:28px 18px 16px;text-align:center}h1{margin:0;font-size:2rem}.subtitle{color:var(--muted);margin-top:8px}
+.wrap{max-width:1050px;margin:auto;padding:12px 16px 60px}
+.topbar{position:sticky;top:0;z-index:5;background:rgba(8,17,31,.94);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:16px;padding:12px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px}
+.progress{flex:1;min-width:220px;height:12px;background:#020617;border-radius:999px;overflow:hidden;border:1px solid var(--border)}.bar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:.3s}.score{font-weight:700}
+.card{background:linear-gradient(180deg,rgba(31,41,55,.96),rgba(17,24,39,.96));border:1px solid var(--border);border-radius:20px;padding:20px;margin:12px 0 18px;box-shadow:0 12px 30px rgba(0,0,0,.25)}
+.intro{color:var(--muted);background:rgba(2,6,23,.35);border:1px solid var(--border);border-radius:14px;padding:12px;margin:10px 0 16px}
+.question{padding:14px;border:1px solid var(--border);border-radius:14px;background:rgba(2,6,23,.35);margin:12px 0}.qtext{font-weight:800;margin-bottom:10px;font-size:1.08rem}
+button,.choice{cursor:pointer;border:none;border-radius:12px;padding:10px 14px;font-weight:700;color:var(--text);background:#334155;margin:4px;transition:.15s}button:hover,.choice:hover{transform:translateY(-1px);filter:brightness(1.1)}
+input[type="text"]{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:#020617;color:var(--text);font-size:1rem;margin-top:8px}
+.feedback{margin-top:8px;font-weight:650}.ok{color:#86efac}.bad{color:#fca5a5}.pill{display:inline-block;padding:7px 10px;border:1px solid var(--border);border-radius:999px;background:#020617;margin:4px}
+.checkbox-row label{display:block;background:#020617;border:1px solid var(--border);border-radius:12px;padding:10px;margin:8px 0;cursor:pointer}
+.image-box{width:100%;min-height:220px;border:1px dashed #64748b;border-radius:14px;background:#020617;display:flex;align-items:center;justify-content:center;overflow:hidden;margin:10px 0;color:#94a3b8;text-align:center;padding:12px}.image-box img{width:100%;max-height:340px;object-fit:contain;display:block}
+code{background:#020617;border:1px solid var(--border);border-radius:6px;padding:2px 5px}.footer-actions{text-align:center;margin-top:26px}.result{text-align:center;padding:24px;border-radius:20px;background:#020617;border:1px solid var(--border);display:none;margin-top:18px}
+@media(max-width:700px){h1{font-size:1.55rem}.card{padding:16px}button,.choice{width:100%;margin:5px 0}}
+</style>
+</head>
+<body>
+<header><h1>Prática de Patologia</h1><div class="subtitle">Módulos 3 e 4 • Inflamação, reparo, metaplasia e neoplasias</div></header>
+<div class="wrap"><div class="topbar"><div class="progress"><div class="bar" id="bar"></div></div><div class="score">Pontuação: <span id="score">0</span>/<span id="total">0</span></div></div>
+<section class="card"><h2>🔬 Identificação por lâmina</h2><div class="intro">Para inserir as imagens, procure por <code>img:""</code> dentro de <code>const practicalQuestions</code> e coloque o link ou nome do arquivo da imagem. Exemplo: <code>img:"apendicite.jpg"</code>.</div><div id="pratica-imgs"></div></section>
+<div class="footer-actions"><button onclick="finishGame()">Finalizar jogo</button><button onclick="resetGame()">Recomeçar</button></div><div class="result" id="result"></div></div>
+<script>
+let score=0, answered=0, total=0; const answeredIds=new Set();
+function normalize(s){return (s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim();}
+function mark(id, points){if(answeredIds.has(id))return false; answeredIds.add(id); answered++; score+=points; updateScore(); return true;}
+function updateScore(){document.getElementById("score").textContent=score; document.getElementById("total").textContent=total; document.getElementById("bar").style.width=total?Math.round((answered/total)*100)+"%":"0%";}
+function makeInput(container,id,label,accepted,hint=""){total++; const div=document.createElement("div"); div.className="question"; div.innerHTML=`<div class="qtext">${label}</div><div class="mini">${hint}</div>`; const input=document.createElement("input"); input.type="text"; input.placeholder="Digite aqui..."; const b=document.createElement("button"); b.textContent="Conferir"; const fb=document.createElement("div"); fb.className="feedback"; b.onclick=()=>{if(answeredIds.has(id))return; const ans=normalize(input.value); const ok=accepted.some(a=>ans===normalize(a)); input.disabled=true; b.disabled=true; if(ok){mark(id,1); fb.innerHTML=`<span class="ok">✅ Aceito!</span>`;}else{mark(id,0); fb.innerHTML=`<span class="bad">❌ Não foi aceito.</span> Resposta esperada: <span class="pill">${accepted[0]}</span>`;}}; div.appendChild(input); div.appendChild(b); div.appendChild(fb); container.appendChild(div);}
+function makeMultiCheck(container,id,text,options,correctSet){total++; const div=document.createElement("div"); div.className="question"; div.innerHTML=`<div class="qtext">${text}</div>`; const box=document.createElement("div"); box.className="checkbox-row"; options.forEach((op,i)=>{const lab=document.createElement("label"); lab.innerHTML=`<input type="checkbox" value="${i}"> ${op}`; box.appendChild(lab);}); const b=document.createElement("button"); b.textContent="Conferir"; const fb=document.createElement("div"); fb.className="feedback"; b.onclick=()=>{if(answeredIds.has(id))return; const selected=[...box.querySelectorAll("input:checked")].map(x=>Number(x.value)).sort().join(","); const correct=[...correctSet].sort().join(","); box.querySelectorAll("input").forEach(x=>x.disabled=true); b.disabled=true; if(selected===correct){mark(id,1); fb.innerHTML=`<span class="ok">✅ Correto!</span>`;}else{mark(id,0); fb.innerHTML=`<span class="bad">❌ Incorreto.</span> Resposta esperada: ${[...correctSet].map(i=>options[i]).join("; ")}.`;}}; div.appendChild(box); div.appendChild(b); div.appendChild(fb); container.appendChild(div);}
+function makeImageQuestion(container,q){const div=document.createElement("div"); div.className="question"; const imageHtml=q.img?`<div class="image-box"><img src="${q.img}" alt="${q.title}"></div>`:`<div class="image-box">Espaço para imagem<br><span class="mini">Edite <code>img:""</code> no bloco <code>const practicalQuestions</code></span></div>`; div.innerHTML=`<div class="qtext">${q.title}</div>${imageHtml}`; const nameDiv=document.createElement("div"); div.appendChild(nameDiv); makeInput(nameDiv,q.id+"-nome","1) Identifique o processo/lâmina:",q.acceptedName,""); const microDiv=document.createElement("div"); div.appendChild(microDiv); makeMultiCheck(microDiv,q.id+"-micro","2) Características MICROSCÓPICAS:",q.micro,new Set(q.correctMicro)); const macroDiv=document.createElement("div"); div.appendChild(macroDiv); makeMultiCheck(macroDiv,q.id+"-macro","3) Características MACROSCÓPICAS:",q.macro,new Set(q.correctMacro)); const causesDiv=document.createElement("div"); div.appendChild(causesDiv); makeMultiCheck(causesDiv,q.id+"-causas","4) Possíveis causas/fatores associados:",q.causes,new Set(q.correctCauses)); const physioDiv=document.createElement("div"); div.appendChild(physioDiv); makeMultiCheck(physioDiv,q.id+"-fisio","5) Fisiopatologia:",q.physio,new Set(q.correctPhysio)); container.appendChild(div);}
+const practicalQuestions = [
+  {
+    "id": "p1",
+    "title": "Lâmina 208 – Apendicite aguda",
+    "img": "https://i.imgur.com/LDSFaTG.jpeg",
+    "acceptedName": [
+      "apendicite",
+      "apendicite aguda",
+      "inflamacao aguda",
+      "inflamação aguda"
+    ],
+    "micro": [
+      "Infiltrado inflamatório difuso rico em neutrófilos",
+      "Necrose liquefativa e destruição da mucosa",
+      "Hiperemia ativa e marginação leucocitária",
+      "Edema do tipo exsudato",
+      "Pérolas de queratina"
+    ],
+    "correctMicro": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "macro": [
+      "Aumento de volume/turgor",
+      "Coloração avermelhada por hiperemia",
+      "Edema da parede",
+      "Lesão nodular encapsulada",
+      "Aspecto branco-amarelado friável"
+    ],
+    "correctMacro": [
+      0,
+      1,
+      2
+    ],
+    "causes": [
+      "Obstrução da luz do apêndice",
+      "Infecção bacteriana",
+      "Proliferação da flora intestinal",
+      "HPV",
+      "Aterosclerose coronariana"
+    ],
+    "correctCauses": [
+      0,
+      1,
+      2
+    ],
+    "physio": [
+      "Vasodilatação",
+      "Aumento da permeabilidade vascular",
+      "Recrutamento de neutrófilos",
+      "Liberação de enzimas que podem causar destruição tecidual",
+      "Metástase linfática"
+    ],
+    "correctPhysio": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "id": "p2",
+    "title": "Lâmina 46 – Pneumonia",
+    "img": "https://i.imgur.com/uVHCVnT.jpeg",
+    "acceptedName": [
+      "pneumonia",
+      "inflamacao aguda pulmonar",
+      "inflamação aguda pulmonar"
+    ],
+    "micro": [
+      "Hiperemia ativa nos septos alveolares",
+      "Edema/exsudato nos alvéolos",
+      "Infiltrado inflamatório difuso rico em neutrófilos",
+      "Possível destruição de pneumócitos e septos alveolares",
+      "Células gigantes de Langhans"
+    ],
+    "correctMicro": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "macro": [
+      "Aumento de volume/turgor",
+      "Coloração avermelhada por hiperemia",
+      "Consolidação pulmonar em áreas acometidas",
+      "Superfície lisa e encapsulada",
+      "Nódulo tumoral bem delimitado"
+    ],
+    "correctMacro": [
+      0,
+      1,
+      2
+    ],
+    "causes": [
+      "Infecção bacteriana",
+      "Streptococcus pneumoniae",
+      "Aspiração/contaminação das vias aéreas",
+      "HPV",
+      "H. pylori"
+    ],
+    "correctCauses": [
+      0,
+      1,
+      2
+    ],
+    "physio": [
+      "Vasodilatação capilar",
+      "Aumento da permeabilidade vascular",
+      "Saída de plasma e neutrófilos para os alvéolos",
+      "Formação de exsudato inflamatório",
+      "Formação de pérolas córneas"
+    ],
+    "correctPhysio": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "id": "p3",
+    "title": "Lâmina 138 – Gastrite crônica inespecífica / úlcera gástrica",
+    "img": "https://i.imgur.com/HPwg11v.jpeg",
+    "acceptedName": [
+      "gastrite cronica",
+      "gastrite crônica",
+      "inflamacao cronica inespecifica",
+      "inflamação crônica inespecífica",
+      "ulcera gastrica",
+      "úlcera gástrica"
+    ],
+    "micro": [
+      "Infiltrado crônico com linfócitos, plasmócitos e macrófagos",
+      "Tecido de granulação com vasos neoformados",
+      "Fibroblastos proliferados",
+      "Necrose superficial com fibrina e células inflamatórias",
+      "Predomínio absoluto de neutrófilos sem reparo"
+    ],
+    "correctMicro": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "macro": [
+      "Lesão ulcerada esbranquiçada",
+      "Sangramento fácil à manipulação",
+      "Perda da mucosa em área ulcerada",
+      "Lesão encapsulada lisa",
+      "Massa infiltrativa com metástase"
+    ],
+    "correctMacro": [
+      0,
+      1,
+      2
+    ],
+    "causes": [
+      "H. pylori",
+      "Irritação crônica da mucosa",
+      "Autoimunidade",
+      "Uso crônico de anti-inflamatórios",
+      "Tromboembolismo pulmonar"
+    ],
+    "correctCauses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "physio": [
+      "Estímulo persistente mantém inflamação crônica",
+      "Destruição progressiva do epitélio de revestimento",
+      "Tentativa de reparo com angiogênese e fibroblastos",
+      "Substituição por tecido conjuntivo cicatricial",
+      "Resposta granulomatosa obrigatória"
+    ],
+    "correctPhysio": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "id": "p4",
+    "title": "Lâmina 211 – Tuberculose / inflamação granulomatosa",
+    "img": "https://i.imgur.com/0W6qygM.jpeg",
+    "acceptedName": [
+      "tuberculose",
+      "inflamacao granulomatosa",
+      "inflamação granulomatosa",
+      "granuloma caseoso",
+      "necrose caseosa"
+    ],
+    "micro": [
+      "Granuloma com necrose caseosa central",
+      "Células epitelioides",
+      "Células gigantes de Langhans",
+      "Infiltrado inflamatório crônico ao redor do granuloma",
+      "Pérolas de queratina"
+    ],
+    "correctMicro": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "macro": [
+      "Aspecto branco-amarelado",
+      "Friável",
+      "Aspecto caseoso semelhante a queijo",
+      "Superfície lisa encapsulada",
+      "Coloração vermelha por hiperemia aguda"
+    ],
+    "correctMacro": [
+      0,
+      1,
+      2
+    ],
+    "causes": [
+      "Mycobacterium tuberculosis",
+      "Agente persistente difícil de eliminar",
+      "Resposta imune celular crônica",
+      "HPV",
+      "Obstrução coronariana"
+    ],
+    "correctCauses": [
+      0,
+      1,
+      2
+    ],
+    "physio": [
+      "Ativação de linfócitos T CD4+",
+      "Ativação de macrófagos",
+      "Transformação em células epitelioides",
+      "Fusão de macrófagos formando células gigantes",
+      "Predomínio de neutrófilos como evento principal"
+    ],
+    "correctPhysio": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "id": "p5",
+    "title": "Lâmina 156 – Cicatrização por primeira intenção",
+    "img": "https://i.imgur.com/XtyNgxY.jpeg",
+    "acceptedName": [
+      "cicatrizacao por primeira intencao",
+      "cicatrização por primeira intenção",
+      "reparo tecidual",
+      "cicatrizacao",
+      "cicatrização"
+    ],
+    "micro": [
+      "Tecido de granulação imaturo",
+      "Angiogênese intensa com vasos neoformados",
+      "Fibroblastos ativos",
+      "Reepitelização sem cristas epiteliais",
+      "Pleomorfismo maligno intenso"
+    ],
+    "correctMicro": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "macro": [
+      "Aspecto róseo",
+      "Pode sangrar ao toque",
+      "Pele lisa e achatada na cicatriz inicial",
+      "Massa tumoral infiltrativa",
+      "Centro com necrose caseosa"
+    ],
+    "correctMacro": [
+      0,
+      1,
+      2
+    ],
+    "causes": [
+      "Ferida cirúrgica limpa",
+      "Bordas bem aproximadas",
+      "Sutura adequada",
+      "Grande perda tecidual infectada",
+      "HPV persistente"
+    ],
+    "correctCauses": [
+      0,
+      1,
+      2
+    ],
+    "physio": [
+      "Hemostasia inicial com formação de coágulo",
+      "Inflamação aguda transitória",
+      "Fase proliferativa com fibroblastos e vasos novos",
+      "Deposição progressiva de colágeno",
+      "Metástase linfonodal"
+    ],
+    "correctPhysio": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "id": "p6",
+    "title": "Lâmina 219 – Metaplasia do colo uterino",
+    "img": "https://i.imgur.com/FFki314.jpeg",
+    "acceptedName": [
+      "metaplasia do colo uterino",
+      "metaplasia escamosa",
+      "metaplasia cervical"
+    ],
+    "micro": [
+      "Substituição do epitélio prismático por epitélio estratificado pavimentoso",
+      "Glândulas endocervicais remanescentes na área transformada",
+      "Coilócitos associados ao HPV",
+      "Infiltrado inflamatório crônico na lâmina própria",
+      "Ninhos infiltrativos malignos com pérolas córneas obrigatórios"
+    ],
+    "correctMicro": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "macro": [
+      "Aspecto esbranquiçado",
+      "Superfície mais áspera",
+      "Maior resistência epitelial",
+      "Massa infiltrativa ulcerada com necrose central",
+      "Nódulo encapsulado"
+    ],
+    "correctMacro": [
+      0,
+      1,
+      2
+    ],
+    "causes": [
+      "Inflamação crônica",
+      "HPV",
+      "Acidez vaginal",
+      "Microtraumas repetidos",
+      "Tromboembolismo pulmonar"
+    ],
+    "correctCauses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "physio": [
+      "Adaptação celular a agressão crônica",
+      "Substituição por epitélio mais resistente",
+      "Pode predispor a displasia se o estímulo persistir",
+      "HPV pode causar alterações citopáticas como coilócitos",
+      "Proliferação autônoma maligna obrigatória"
+    ],
+    "correctPhysio": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "id": "p8",
+    "title": "Lâmina 217 – Leiomioma uterino",
+    img: "https://i.imgur.com/omqQhhx.jpeg",
+    "acceptedName": [
+      "leiomioma",
+      "leiomioma uterino",
+      "fibroma uterino",
+      "neoplasia benigna de musculo liso",
+      "neoplasia benigna de músculo liso"
+    ],
+    "micro": [
+      "Feixes entrecruzados de músculo liso",
+      "Células fusiformes semelhantes ao músculo liso normal",
+      "Baixa atipia celular",
+      "Estroma com vasos sanguíneos",
+      "Alto pleomorfismo com mitoses atípicas numerosas"
+    ],
+    "correctMicro": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "macro": [
+      "Lesão nodular bem delimitada",
+      "Superfície lisa",
+      "Encapsulada ou pseudocapsulada",
+      "Massa infiltrativa sem cápsula",
+      "Necrose hemorrágica central obrigatória"
+    ],
+    "correctMacro": [
+      0,
+      1,
+      2
+    ],
+    "causes": [
+      "Proliferação benigna de músculo liso",
+      "Influência de estrogênio",
+      "Influência de progesterona",
+      "HPV oncogênico",
+      "Metástase linfática"
+    ],
+    "correctCauses": [
+      0,
+      1,
+      2
+    ],
+    "physio": [
+      "Crescimento expansivo sem invasão",
+      "Pode comprimir órgãos adjacentes",
+      "Pode causar sangramento uterino anormal",
+      "Mantém diferenciação muscular lisa",
+      "Produz pérolas de queratina"
+    ],
+    "correctPhysio": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "id": "p9",
+    "title": "Lâmina 79 – Carcinoma epidermoide do colo uterino",
+    "img": "https://i.imgur.com/pAPBUn2.jpeg",
+    "acceptedName": [
+      "carcinoma epidermoide",
+      "carcinoma de celulas escamosas",
+      "carcinoma de células escamosas",
+      "neoplasia maligna do colo uterino",
+      "carcinoma escamoso"
+    ],
+    "micro": [
+      "Cordões e ninhos neoplásicos infiltrando a lâmina própria",
+      "Pérolas de queratina",
+      "Núcleos hipercromáticos",
+      "Pleomorfismo celular e nuclear",
+      "Crescimento expansivo encapsulado sem invasão"
+    ],
+    "correctMicro": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "macro": [
+      "Lesão arredondada com bordas elevadas",
+      "Centro com necrose",
+      "Hemorragia central possível",
+      "Superfície lisa e encapsulada",
+      "Nódulo benigno bem delimitado"
+    ],
+    "correctMacro": [
+      0,
+      1,
+      2
+    ],
+    "causes": [
+      "Infecção persistente por HPV oncogênico",
+      "HPV 16/18",
+      "Progressão de lesões escamosas/displasia",
+      "Tuberculose",
+      "Aterosclerose"
+    ],
+    "correctCauses": [
+      0,
+      1,
+      2
+    ],
+    "physio": [
+      "Neoplasia maligna de origem epitelial",
+      "Invasão da lâmina própria",
+      "Atipia celular intensa",
+      "Queratinização indica diferenciação escamosa",
+      "Ausência de invasão é critério principal"
+    ],
+    "correctPhysio": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "id": "p10",
+    "title": "Lâmina 202 – Metástase linfonodal de carcinoma epidermoide",
+    "img": "https://i.imgur.com/xYHDPmV.jpeg",
+    "acceptedName": [
+      "metastase linfonodal",
+      "metástase linfonodal",
+      "metastase de carcinoma epidermoide",
+      "metástase de carcinoma epidermoide",
+      "linfonodo com metastase"
+    ],
+    "micro": [
+      "Substituição/destruição da arquitetura linfonodal",
+      "Células tumorais epiteliais malignas no linfonodo",
+      "Material eosinofílico central compatível com queratina",
+      "Pleomorfismo e núcleos hipercromáticos",
+      "Arquitetura linfonodal totalmente preservada"
+    ],
+    "correctMicro": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "macro": [
+      "Lesões múltiplas nodulares no linfonodo",
+      "Coalescência em massa maior com o crescimento",
+      "Massa dura e irregular",
+      "Lesão lisa e encapsulada benigna",
+      "Aspecto róseo de tecido de granulação"
+    ],
+    "correctMacro": [
+      0,
+      1,
+      2
+    ],
+    "causes": [
+      "Carcinoma epidermoide primário",
+      "Invasão de vasos linfáticos por células malignas",
+      "Disseminação linfática",
+      "Ferida cirúrgica limpa",
+      "Inflamação aguda bacteriana"
+    ],
+    "correctCauses": [
+      0,
+      1,
+      2
+    ],
+    "physio": [
+      "Células malignas se desprendem do tumor primário",
+      "Invadem vasos linfáticos",
+      "Colonizam linfonodos regionais",
+      "Substituem o parênquima linfóide normal",
+      "Reparo por primeira intenção"
+    ],
+    "correctPhysio": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "id": "p11",
+    "title": "Lâmina 127 – Rabdomiossarcoma",
+    "img": "https://i.imgur.com/lPO44In.jpeg",
+    "acceptedName": [
+      "rabdomiossarcoma",
+      "rabsomiosarcoma",
+      "neoplasia maligna de musculo estriado",
+      "neoplasia maligna de músculo estriado",
+      "sarcoma"
+    ],
+    "micro": [
+      "Núcleos hipercromáticos",
+      "Pleomorfismo celular e nuclear",
+      "Nucléolos evidentes",
+      "Alto grau de anaplasia/indiferenciação",
+      "Baixa atipia com cápsula bem definida"
+    ],
+    "correctMicro": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "macro": [
+      "Lesão mal delimitada",
+      "Ausência de cápsula",
+      "Crescimento infiltrativo",
+      "Superfície lisa e encapsulada",
+      "Nódulo benigno bem delimitado"
+    ],
+    "correctMacro": [
+      0,
+      1,
+      2
+    ],
+    "causes": [
+      "Neoplasia maligna de origem mesenquimal",
+      "Origem em músculo estriado",
+      "Alto grau de indiferenciação tumoral",
+      "HPV cervical como causa direta clássica",
+      "H. pylori"
+    ],
+    "correctCauses": [
+      0,
+      1,
+      2
+    ],
+    "physio": [
+      "Sarcoma é neoplasia maligna mesenquimal",
+      "Anaplasia indica perda de diferenciação",
+      "Pode exigir imuno-histoquímica para confirmar origem",
+      "Cresce de forma infiltrativa e agressiva",
+      "Nunca invade tecidos adjacentes"
+    ],
+    "correctPhysio": [
+      0,
+      1,
+      2,
+      3
+    ]
+  }
+];
+const pratica=document.getElementById("pratica-imgs"); practicalQuestions.forEach(q=>makeImageQuestion(pratica,q)); updateScore();
+function finishGame(){const pct=total?Math.round((score/total)*100):0; const res=document.getElementById("result"); let msg="Continue revisando macro, micro, causas e fisiopatologia."; if(pct>=85)msg="Excelente! Você está forte para a prática."; else if(pct>=65)msg="Bom desempenho! Revise os diferenciais."; else if(pct>=45)msg="Base em construção: foque em reconhecimento morfológico."; res.style.display="block"; res.innerHTML=`<h2>Resultado final</h2><p class="score">${score}/${total} pontos (${pct}%)</p><p>${msg}</p>`; res.scrollIntoView({behavior:"smooth"});}
+function resetGame(){location.reload();}
+</script></body></html>

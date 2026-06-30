@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora Morfo 1</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+      background: #f4f4f9;
+    }
+    h2 {
+      text-align: center;
+      font-size: 1.8em;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      background: #007BFF;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .resultado {
+      margin-top: 30px;
+      background: white;
+      border-left: 5px solid #007BFF;
+      padding: 15px;
+      white-space: pre-wrap;
+      font-size: 1em;
+    }
+    a {
+      display: inline-block;
+      margin-top: 20px;
+      text-decoration: none;
+      color: #333;
+      font-size: 1em;
+    }
+    /* Mobile adjustments */
+    @media (max-width: 768px) {
+      body {
+        padding: 15px;
+      }
+      h2 {
+        font-size: 1.5em;
+      }
+      input {
+        font-size: 1.1em;
+      }
+      button {
+        font-size: 1.2em;
+        padding: 15px;
+      }
+      .resultado {
+        font-size: 1.1em;
+      }
+      a {
+        font-size: 1.1em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="semestre1.html">&larr; Voltar ao menu</a>
+  <h2>🧠 Calculadora – MORFO 1</h2>
+  <p>Preencha as notas já obtidas. O sistema calcula a média parcial e quanto falta para cada menção.</p>
+
+  <label>Gênese (Selma) – 9%</label>
+  <input type="number" step="0.01" id="genese" placeholder="Ex: 10">
+
+  <label>Locomotor – Histologia/Embriologia – 17,82%</label>
+  <input type="number" step="0.01" id="histo_loco" placeholder="Ex: 8.5">
+
+  <label>Locomotor – Anatomia – 11,88%</label>
+  <input type="number" step="0.01" id="anat_loco" placeholder="Ex: 7.0">
+
+  <label>Sistema Nervoso – Histologia/Embriologia – 9,234%</label>
+  <input type="number" step="0.01" id="histo_neuro" placeholder="Ex: 9.0">
+
+  <label>Sistema Nervoso – Neurofisiologia – 22,06%</label>
+  <input type="number" step="0.01" id="neurofisio" placeholder="Ex: 6.5">
+
+  <label>Sistema Nervoso – Anatomia – 20%</label>
+  <input type="number" step="0.01" id="anat_neuro" placeholder="Ex: 8.0">
+
+  <label>Avaliação Integradora – 10%</label>
+  <input type="number" step="0.01" id="integradora" placeholder="Ex: 9.0">
+
+  <button onclick="calcularMorfo()">Calcular Nota</button>
+
+  <div id="resultado" class="resultado" style="display:none;"></div>
+
+  <script>
+  function calcularMorfo() {
+    const pesos = {
+      genese: 0.09,
+      histo_loco: 0.1782,
+      anat_loco: 0.1188,
+      histo_neuro: 0.09234,
+      neurofisio: 0.2206,
+      anat_neuro: 0.20,
+      integradora: 0.10
+    };
+
+    let somaPesos = 0, somaNotas = 0;
+    for (const key in pesos) {
+      const val = parseFloat(document.getElementById(key).value);
+      if (!isNaN(val)) {
+        somaPesos += pesos[key];
+        somaNotas += val * pesos[key];
+      }
+    }
+
+    const mfParcial = somaNotas;
+    const restantePeso = 1 - somaPesos;
+
+    const metas = [
+      { nome: "MM (5,0)", alvo: 5.0 },
+      { nome: "MS (7,0)", alvo: 7.0 },
+      { nome: "SS (9,0)", alvo: 9.0 }
+    ];
+
+    let resultado = `<strong>Média parcial:</strong> ${mfParcial.toFixed(2)}<br><br>`;
+
+    if (restantePeso > 0) {
+      metas.forEach(meta => {
+        const falta = (meta.alvo - mfParcial) / restantePeso;
+        if (falta <= 0) {
+          resultado += `✅ Já garantiu ${meta.nome}.<br>`;
+        } else if (falta > 10) {
+          resultado += `❌ Mesmo tirando 10 no restante, não atinge ${meta.nome}.<br>`;
+        } else {
+          resultado += `🔹 Precisa média <strong>${falta.toFixed(2)}</strong> no restante para ${meta.nome}.<br>`;
+        }
+      });
+    } else {
+      resultado += `<strong>Média final:</strong> ${mfParcial.toFixed(2)}<br>`;
+      if (mfParcial >= 9) {
+        resultado += "✅ Menção SS garantida!";
+      } else if (mfParcial >= 7) {
+        resultado += "✅ Menção MS garantida!";
+      } else if (mfParcial >= 5) {
+        resultado += "✅ Menção MM (aprovado).";
+      } else {
+        resultado += "❌ Reprovado (menção MI ou II).";
+      }
+    }
+
+    const div = document.getElementById("resultado");
+    div.style.display = "block";
+    div.innerHTML = resultado;
+
+    // Scroll suave até a div do resultado
+    div.scrollIntoView({ behavior: "smooth" });
+  }
+</script>
+</body>
+</html>
+

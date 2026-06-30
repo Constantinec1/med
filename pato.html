@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Treino de Patologia</title>
+  <style>
+    :root{
+      --bg:#0b1020; --card:#111827; --text:#f9fafb; --muted:#cbd5e1;
+      --accent:#22c55e; --accent2:#38bdf8; --wrong:#ef4444; --border:#334155; --tab:#020617;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at top,#1e3a5f,var(--bg));color:var(--text);line-height:1.5}
+    header{padding:28px 18px 16px;text-align:center}
+    h1{margin:0;font-size:2rem}.subtitle{color:var(--muted);margin-top:8px}
+    .wrap{max-width:1050px;margin:auto;padding:12px 16px 60px}
+    .topbar{position:sticky;top:0;z-index:5;background:rgba(11,16,32,.94);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:16px;padding:12px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px}
+    .progress{flex:1;min-width:220px;height:12px;background:#020617;border-radius:999px;overflow:hidden;border:1px solid var(--border)}
+    .bar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:.3s}.score{font-weight:700}
+    .tabs{display:flex;gap:8px;overflow-x:auto;padding:10px 0 14px}
+    .tab-btn{white-space:nowrap;border:1px solid var(--border);background:var(--tab);color:var(--text);border-radius:999px;padding:10px 14px;font-weight:750;cursor:pointer}
+    .tab-btn.active{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#03111f;border-color:transparent}
+    .tab-content{display:none}.tab-content.active{display:block}
+    .card{background:linear-gradient(180deg,rgba(31,41,55,.96),rgba(17,24,39,.96));border:1px solid var(--border);border-radius:20px;padding:20px;margin:12px 0 18px;box-shadow:0 12px 30px rgba(0,0,0,.25)}
+    .phase{display:inline-block;padding:5px 10px;border-radius:999px;background:#020617;border:1px solid var(--border);color:#bfdbfe;font-size:.9rem;margin-bottom:8px}
+    h2{margin:6px 0 10px;font-size:1.35rem}
+    .intro{color:var(--muted);background:rgba(2,6,23,.35);border:1px solid var(--border);border-radius:14px;padding:12px;margin:10px 0 16px}
+    .section-title{margin-top:20px;color:#bfdbfe;font-size:1.05rem;font-weight:800;border-left:4px solid var(--accent2);padding-left:10px}
+    .question{padding:14px;border:1px solid var(--border);border-radius:14px;background:rgba(2,6,23,.35);margin:12px 0}
+    .qtext{font-weight:700;margin-bottom:10px}
+    button,.choice{cursor:pointer;border:none;border-radius:12px;padding:10px 14px;font-weight:700;color:var(--text);background:#334155;margin:4px;transition:.15s}
+    button:hover,.choice:hover{transform:translateY(-1px);filter:brightness(1.1)}
+    .choice.correct{background:var(--accent);color:#03111f}.choice.wrong{background:var(--wrong)}
+    input[type="text"]{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:#020617;color:var(--text);font-size:1rem;margin-top:8px}
+    .mini{color:var(--muted);font-size:.92rem}.feedback{margin-top:8px;font-weight:650}.ok{color:#86efac}.bad{color:#fca5a5}
+    .pill{display:inline-block;padding:7px 10px;border:1px solid var(--border);border-radius:999px;background:#020617;margin:4px}
+    .checkbox-row label{display:block;background:#020617;border:1px solid var(--border);border-radius:12px;padding:10px;margin:8px 0;cursor:pointer}
+    .image-box{width:100%;min-height:220px;border:1px dashed #64748b;border-radius:14px;background:#020617;display:flex;align-items:center;justify-content:center;overflow:hidden;margin:10px 0;color:#94a3b8;text-align:center;padding:12px}
+    .image-box img{width:100%;max-height:320px;object-fit:contain;display:block}
+    code{background:#020617;border:1px solid var(--border);border-radius:6px;padding:2px 5px}
+    .footer-actions{text-align:center;margin-top:26px}
+    .result{text-align:center;padding:24px;border-radius:20px;background:#020617;border:1px solid var(--border);display:none;margin-top:18px}
+    @media(max-width:700px){h1{font-size:1.55rem}.card{padding:16px}button,.choice{width:100%;margin:5px 0}}
+  </style>
+</head>
+<body>
+<header>
+  <h1>Treino de Patologia</h1>
+  <div class="subtitle">Teórica + prática • Módulos 1 e 2</div>
+</header>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="progress"><div class="bar" id="bar"></div></div>
+    <div class="score">Pontuação: <span id="score">0</span>/<span id="total">0</span></div>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab-btn active" onclick="openTab('teorica1', this)">🧬 Teórica Módulo 1</button>
+    <button class="tab-btn" onclick="openTab('teorica2', this)">🩸 Teórica Módulo 2</button>
+    <button class="tab-btn" onclick="openTab('pratica', this)">🔬 Prática</button>
+  </nav>
+
+  <section id="teorica1" class="tab-content active">
+    <div class="card">
+      <span class="phase">Módulo 1</span>
+      <h2>Respostas celulares ao estresse e estímulos tóxicos</h2>
+      <div class="intro">Adaptação, lesão reversível, lesão irreversível, morte celular, pigmentos e necroses.</div>
+      <div class="section-title">Lacunas</div><div id="m1-lacunas"></div>
+      <div class="section-title">V/F</div><div id="m1-vf"></div>
+      <div class="section-title">Múltipla escolha</div><div id="m1-mc"></div>
+    </div>
+  </section>
+
+  <section id="teorica2" class="tab-content">
+    <div class="card">
+      <span class="phase">Módulo 2</span>
+      <h2>Distúrbios hemodinâmicos, tromboembolia e choque</h2>
+      <div class="intro">Hiperemia, congestão, edema, trombose, embolia, infartos e choque.</div>
+      <div class="section-title">Lacunas</div><div id="m2-lacunas"></div>
+      <div class="section-title">V/F</div><div id="m2-vf"></div>
+      <div class="section-title">Múltipla escolha</div><div id="m2-mc"></div>
+    </div>
+  </section>
+
+  <section id="pratica" class="tab-content">
+    <div class="card">
+      <span class="phase">Prática</span>
+      <h2>Identificação por lâmina</h2>
+      
+      <div id="pratica-imgs"></div>
+    </div>
+  </section>
+
+  <div class="footer-actions">
+    <button onclick="finishGame()">Finalizar jogo</button>
+    <button onclick="resetGame()">Recomeçar</button>
+  </div>
+  <div class="result" id="result"></div>
+</div>
+
+<script>
+let score = 0, answered = 0, total = 0;
+const answeredIds = new Set();
+
+function normalize(s){
+  return (s||"").toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^a-z0-9 ]/g," ")
+    .replace(/\s+/g," ")
+    .trim();
+}
+function shuffleArray(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+function mark(id, points){
+  if(answeredIds.has(id)) return false;
+  answeredIds.add(id);
+  answered++;
+  score += points;
+  updateScore();
+  return true;
+}
+function updateScore(){
+  document.getElementById("score").textContent = score;
+  document.getElementById("total").textContent = total;
+  document.getElementById("bar").style.width = total ? Math.round((answered/total)*100)+"%" : "0%";
+}
+function openTab(tabId, btn){
+  document.querySelectorAll(".tab-content").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(x=>x.classList.remove("active"));
+  document.getElementById(tabId).classList.add("active");
+  btn.classList.add("active");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function makeChoiceQuestion(container,id,text,options,correctIndex,explanation=""){
+  total++;
+  const div=document.createElement("div");
+  div.className="question";
+  div.innerHTML=`<div class="qtext">${text}</div>`;
+  const btns=[];
+  const indexedOptions=shuffleArray(options.map((op,originalIndex)=>({op,originalIndex})));
+  indexedOptions.forEach((item)=>{
+    const b=document.createElement("button");
+    b.className="choice";
+    b.textContent=item.op;
+    b.onclick=()=>{
+      if(answeredIds.has(id)) return;
+      btns.forEach(x=>x.disabled=true);
+      if(item.originalIndex===correctIndex){
+        b.classList.add("correct");
+        mark(id,1);
+        fb.innerHTML=`<span class="ok">✅ Correto!</span> ${explanation}`;
+      }else{
+        b.classList.add("wrong");
+        const correctShownIndex=indexedOptions.findIndex(x=>x.originalIndex===correctIndex);
+        if(correctShownIndex>=0) btns[correctShownIndex].classList.add("correct");
+        mark(id,0);
+        fb.innerHTML=`<span class="bad">❌ Incorreto.</span> ${explanation}`;
+      }
+    };
+    btns.push(b);
+    div.appendChild(b);
+  });
+  const fb=document.createElement("div");
+  fb.className="feedback";
+  div.appendChild(fb);
+  container.appendChild(div);
+}
+function makeVF(container,id,text,correctBool,explanation=""){
+  makeChoiceQuestion(container,id,text,["V","F"],correctBool?0:1,explanation);
+}
+function makeInput(container,id,label,accepted,hint=""){
+  total++;
+  const div=document.createElement("div");
+  div.className="question";
+  div.innerHTML=`<div class="qtext">${label}</div><div class="mini">${hint}</div>`;
+  const input=document.createElement("input");
+  input.type="text";
+  input.placeholder="Digite aqui...";
+  const b=document.createElement("button");
+  b.textContent="Conferir";
+  const fb=document.createElement("div");
+  fb.className="feedback";
+  b.onclick=()=>{
+    if(answeredIds.has(id)) return;
+    const ans=normalize(input.value);
+    const ok=accepted.some(a=>ans===normalize(a));
+    input.disabled=true;
+    b.disabled=true;
+    if(ok){
+      mark(id,1);
+      fb.innerHTML=`<span class="ok">✅ Aceito!</span>`;
+    }else{
+      mark(id,0);
+      fb.innerHTML=`<span class="bad">❌ Não foi aceito.</span> Resposta esperada: <span class="pill">${accepted[0]}</span>`;
+    }
+  };
+  div.appendChild(input);
+  div.appendChild(b);
+  div.appendChild(fb);
+  container.appendChild(div);
+}
+function makeMultiCheck(container,id,text,options,correctSet){
+  total++;
+  const div=document.createElement("div");
+  div.className="question";
+  div.innerHTML=`<div class="qtext">${text}</div>`;
+  const box=document.createElement("div");
+  box.className="checkbox-row";
+  options.forEach((op,i)=>{
+    const lab=document.createElement("label");
+    lab.innerHTML=`<input type="checkbox" value="${i}"> ${op}`;
+    box.appendChild(lab);
+  });
+  const b=document.createElement("button");
+  b.textContent="Conferir";
+  const fb=document.createElement("div");
+  fb.className="feedback";
+  b.onclick=()=>{
+    if(answeredIds.has(id)) return;
+    const selected=[...box.querySelectorAll("input:checked")].map(x=>Number(x.value)).sort().join(",");
+    const correct=[...correctSet].sort().join(",");
+    box.querySelectorAll("input").forEach(x=>x.disabled=true);
+    b.disabled=true;
+    if(selected===correct){
+      mark(id,1);
+      fb.innerHTML=`<span class="ok">✅ Correto!</span>`;
+    }else{
+      mark(id,0);
+      fb.innerHTML=`<span class="bad">❌ Incorreto.</span> Resposta esperada: ${[...correctSet].map(i=>options[i]).join("; ")}.`;
+    }
+  };
+  div.appendChild(box);
+  div.appendChild(b);
+  div.appendChild(fb);
+  container.appendChild(div);
+}
+function makeImageQuestion(container,q){
+  const div=document.createElement("div");
+  div.className="question";
+  const imageHtml=q.img
+    ? `<div class="image-box"><img src="${q.img}" alt="${q.title}"></div>`
+    : `<div class="image-box">Espaço para imagem<br><span class="mini">Edite <code>img:""</code> no bloco <code>practicalQuestions</code></span></div>`;
+  div.innerHTML=`<div class="qtext">${q.title}</div>${imageHtml}`;
+
+  const nameDiv=document.createElement("div");
+  div.appendChild(nameDiv);
+  makeInput(nameDiv,q.id+"-nome","1) Identifique o diagnóstico/processo:",q.acceptedName,"");
+
+  const microDiv=document.createElement("div");
+  div.appendChild(microDiv);
+  makeMultiCheck(microDiv,q.id+"-micro","2) Selecione as características MICROSCÓPICAS:",q.featuresMicro,new Set(q.correctMicro));
+
+  const macroDiv=document.createElement("div");
+  div.appendChild(macroDiv);
+  makeMultiCheck(macroDiv,q.id+"-macro","3) Selecione as características MACROSCÓPICAS:",q.featuresMacro,new Set(q.correctMacro));
+
+  const causesDiv=document.createElement("div");
+  div.appendChild(causesDiv);
+  makeMultiCheck(causesDiv,q.id+"-causas","4) Selecione 1 ou 2 causas possíveis:",q.causes,new Set(q.correctCauses));
+
+  container.appendChild(div);
+}
+
+/* ================= TEÓRICA MÓDULO 1 ================= */
+
+/* LACUNAS: 1 de cada processo */
+makeInput(document.getElementById("m1-lacunas"),"m1-l-hip","Hipertrofia: adaptação celular caracterizada pelo aumento do ________ da célula.",["volume","tamanho"]);
+makeInput(document.getElementById("m1-lacunas"),"m1-l-hid","Degeneração hidrópica: lesão reversível causada por entrada de ________ na célula.",["agua","água"]);
+makeInput(document.getElementById("m1-lacunas"),"m1-l-est","Esteatose: acúmulo intracelular de ________, especialmente triglicerídeos.",["lipideos","lipídios","gordura","triglicerideos","triglicerídeos"]);
+makeInput(document.getElementById("m1-lacunas"),"m1-l-ant","Antracose: acúmulo de pigmento ________ nos pulmões.",["carbonaceo","carbonáceo","carvao","carvão"]);
+makeInput(document.getElementById("m1-lacunas"),"m1-l-mel","Melanose: acúmulo de pigmento relacionado à ________.",["melanina"]);
+makeInput(document.getElementById("m1-lacunas"),"m1-l-hem","Hemossiderose: acúmulo de pigmento derivado da degradação da ________.",["hemoglobina"]);
+makeInput(document.getElementById("m1-lacunas"),"m1-l-coag","Necrose coagulativa: mantém inicialmente a ________ tecidual.",["arquitetura","arquitetura tecidual"]);
+makeInput(document.getElementById("m1-lacunas"),"m1-l-liq","Necrose liquefativa: ocorre por digestão ________ intensa do tecido.",["enzimatica","enzimática"]);
+makeInput(document.getElementById("m1-lacunas"),"m1-l-cas","Necrose caseosa: associada classicamente à ________.",["tuberculose"]);
+
+/* V/F */
+makeVF(document.getElementById("m1-vf"),"m1-v1","Hipertrofia cardíaca por hipertensão crônica ocorre por aumento do tamanho dos cardiomiócitos, não por aumento do número de cardiomiócitos.",true);
+makeVF(document.getElementById("m1-vf"),"m1-v2","Degeneração hidrópica é sempre irreversível e necessariamente evolui para necrose.",false,"É uma lesão reversível se o estímulo agressor for removido.");
+makeVF(document.getElementById("m1-vf"),"m1-v3","Esteatose hepática pode ocorrer por redução da síntese de apoproteínas, prejudicando a exportação de triglicerídeos.",true);
+makeVF(document.getElementById("m1-vf"),"m1-v4","Antracose é pigmentação endógena derivada da hemoglobina.",false,"Antracose é pigmentação exógena por carbono.");
+makeVF(document.getElementById("m1-vf"),"m1-v5","Hemossiderina é pigmento derivado do metabolismo da hemoglobina e pode aparecer em macrófagos.",true);
+makeVF(document.getElementById("m1-vf"),"m1-v6","Necrose liquefativa preserva melhor a arquitetura tecidual do que a necrose coagulativa.",false,"Na liquefativa há digestão enzimática e perda da arquitetura.");
+makeVF(document.getElementById("m1-vf"),"m1-v7","Necrose caseosa combina aspecto granular/amórfico com resposta granulomatosa.",true);
+
+/* MECANISMO CERTO DO PROCESSO */
+makeChoiceQuestion(document.getElementById("m1-mc"),"m1-mec-hip","Mecanismo correto da hipertrofia cardíaca por HAS:",["Aumento da síntese de proteínas contráteis por sobrecarga de trabalho","Deposição de pigmento exógeno","Digestão enzimática total do tecido","Acúmulo de hemoglobina degradada"],0);
+makeChoiceQuestion(document.getElementById("m1-mc"),"m1-mec-hid","Mecanismo correto da degeneração hidrópica:",["Falha da bomba Na+/K+ ATPase com entrada de sódio e água","Obstrução arterial terminal","Fagocitose de carbono por macrófagos","Produção excessiva de melanina"],0);
+makeChoiceQuestion(document.getElementById("m1-mc"),"m1-mec-est","Mecanismo correto da esteatose hepática na desnutrição proteico-calórica:",["Redução de apoproteínas e menor exportação de lipídios","Aumento do retorno venoso pulmonar","Ativação de macrófagos epitelioides","Trombo formado em vida"],0);
+makeChoiceQuestion(document.getElementById("m1-mc"),"m1-mec-ant","Mecanismo correto da antracose:",["Inalação de partículas de carbono fagocitadas por macrófagos","Extravasamento de hemácias com degradação da hemoglobina","Hipóxia isquêmica em órgão sólido","Acúmulo de triglicerídeos em hepatócitos"],0);
+makeChoiceQuestion(document.getElementById("m1-mc"),"m1-mec-hem","Mecanismo correto da hemossiderose:",["Acúmulo de ferro/hemossiderina após degradação da hemoglobina","Entrada de água por falha energética","Necrose hemorrágica por dupla circulação","Aumento ativo do fluxo arterial"],0);
+makeChoiceQuestion(document.getElementById("m1-mc"),"m1-mec-coag","Mecanismo correto da necrose coagulativa:",["Desnaturação proteica predominando sobre digestão enzimática, geralmente por isquemia","Digestão enzimática com formação de pus líquido","Acúmulo de melanina em células tumorais","Vasodilatação arteriolar fisiológica"],0);
+makeChoiceQuestion(document.getElementById("m1-mc"),"m1-mec-liq","Mecanismo correto da necrose liquefativa:",["Digestão enzimática intensa do tecido, comum em abscessos e SNC","Preservação permanente da arquitetura por isquemia","Deposição de carbono nos alvéolos","Hipertrofia compensatória"],0);
+makeChoiceQuestion(document.getElementById("m1-mc"),"m1-mec-cas","Mecanismo correto da necrose caseosa:",["Resposta granulomatosa crônica com necrose central","Falha da bomba de sódio e potássio","Acúmulo de triglicerídeos por apoproteína baixa","Tromboembolismo pulmonar"],0);
+
+/* CASOS CLÍNICOS POR PROCESSO */
+makeChoiceQuestion(document.getElementById("m1-mc"),"m1-caso-hip","Caso: paciente hipertenso crônico apresenta coração aumentado e ventrículo esquerdo espessado. Processo:",["Hipertrofia cardíaca","Necrose liquefativa","Antracose","Hemossiderose"],0);
+makeChoiceQuestion(document.getElementById("m1-mc"),"m1-caso-hid","Caso: célula exposta à hipóxia leve apresenta tumefação e citoplasma claro, mas núcleo preservado. Processo:",["Degeneração hidrópica","Necrose caseosa","Melanoma","Trombose"],0);
+makeChoiceQuestion(document.getElementById("m1-mc"),"m1-caso-est","Caso: paciente desnutrido evolui com fígado aumentado, amarelado e hepatócitos com vacúolos claros. Processo:",["Esteatose hepática","Antracose","Infarto vermelho","Hiperemia ativa"],0);
+makeChoiceQuestion(document.getElementById("m1-mc"),"m1-caso-ant","Caso: pulmão com macrófagos contendo pigmento negro em indivíduo exposto à poluição/fumaça. Processo:",["Antracose","Hemossiderose","Melanose","Necrose liquefativa"],0);
+makeChoiceQuestion(document.getElementById("m1-mc"),"m1-caso-hem","Caso: paciente com congestão pulmonar crônica apresenta macrófagos com pigmento castanho derivado de hemoglobina. Processo:",["Hemossiderose","Antracose","Esteatose","Necrose coagulativa"],0);
+makeChoiceQuestion(document.getElementById("m1-mc"),"m1-caso-coag","Caso: área isquêmica em rim mantém o contorno tecidual inicial, mas perde núcleos. Processo:",["Necrose coagulativa","Necrose liquefativa","Degeneração hidrópica","Melanose"],0);
+makeChoiceQuestion(document.getElementById("m1-mc"),"m1-caso-liq","Caso: lesão cerebral ou abscesso apresenta tecido amolecido, líquido e com perda da arquitetura. Processo:",["Necrose liquefativa","Necrose coagulativa","Hipertrofia","Antracose"],0);
+makeChoiceQuestion(document.getElementById("m1-mc"),"m1-caso-cas","Caso: granuloma com centro amorfo, friável e esbranquiçado em quadro sugestivo de tuberculose. Processo:",["Necrose caseosa","Esteatose","Hiperemia ativa","Tromboembolia"],0);
+
+/* RELAÇÃO CAUSA → PROCESSO / PROCESSO → DESFECHO */
+
+makeChoiceQuestion(
+  document.getElementById("m1-mc"),
+  "m1-rel-est",
+  "Paciente com desnutrição proteico-calórica evolui com fígado aumentado e amarelado. Qual mecanismo relaciona a desnutrição à esteatose hepática?",
+  [
+    "Redução da síntese de apoproteínas e menor exportação de triglicerídeos",
+    "Obstrução venosa passiva",
+    "Digestão enzimática do tecido hepático",
+    "Deposição de pigmento carbonáceo"
+  ],
+  0
+);
+
+makeChoiceQuestion(
+  document.getElementById("m1-mc"),
+  "m1-rel-hip",
+  "Paciente hipertenso crônico desenvolve aumento da espessura ventricular esquerda. Qual estímulo levou a essa adaptação?",
+  [
+    "Sobrecarga pressórica contínua",
+    "Acúmulo de melanina",
+    "Digestão liquefativa do miocárdio",
+    "Formação de granuloma"
+  ],
+  0
+);
+
+makeChoiceQuestion(
+  document.getElementById("m1-mc"),
+  "m1-rel-hid",
+  "Na hipóxia celular inicial, qual alteração leva à degeneração hidrópica?",
+  [
+    "Falha da bomba Na+/K+ ATPase",
+    "Produção excessiva de melanina",
+    "Acúmulo de hemossiderina",
+    "Obstrução de coronária"
+  ],
+  0
+);
+
+makeChoiceQuestion(
+  document.getElementById("m1-mc"),
+  "m1-rel-ant",
+  "Trabalhador exposto à fumaça e poluição apresenta pigmento negro em macrófagos pulmonares. Qual fator causou o processo?",
+  [
+    "Inalação crônica de partículas de carbono",
+    "Extravasamento de hemoglobina",
+    "Acúmulo intracelular de triglicerídeos",
+    "Necrose isquêmica"
+  ],
+  0
+);
+
+makeChoiceQuestion(
+  document.getElementById("m1-mc"),
+  "m1-rel-hem",
+  "Paciente com congestão pulmonar crônica apresenta macrófagos ricos em hemossiderina. O pigmento deriva de:",
+  [
+    "Degradação da hemoglobina extravasada",
+    "Pigmento exógeno inalado",
+    "Acúmulo de triglicerídeos",
+    "Necrose granulomatosa"
+  ],
+  0
+);
+
+makeChoiceQuestion(
+  document.getElementById("m1-mc"),
+  "m1-rel-coag",
+  "Paciente com infarto renal apresenta necrose coagulativa. Qual mecanismo explica esse padrão?",
+  [
+    "Isquemia com desnaturação proteica predominante",
+    "Digestão enzimática intensa",
+    "Deposição de carbono",
+    "Acúmulo de melanina"
+  ],
+  0
+);
+
+makeChoiceQuestion(
+  document.getElementById("m1-mc"),
+  "m1-rel-liq",
+  "Em abscesso bacteriano, qual processo leva à necrose liquefativa?",
+  [
+    "Digestão enzimática intensa por enzimas hidrolíticas",
+    "Vasodilatação arteriolar",
+    "Acúmulo de hemossiderina",
+    "Hipertrofia celular"
+  ],
+  0
+);
+
+makeChoiceQuestion(
+  document.getElementById("m1-mc"),
+  "m1-rel-cas",
+  "Granuloma pulmonar com centro branco-amarelado friável sugere tuberculose. Qual processo está presente?",
+  [
+    "Necrose caseosa",
+    "Necrose gordurosa",
+    "Degeneração hidrópica",
+    "Esteatose"
+  ],
+  0
+);
+
+makeChoiceQuestion(
+  document.getElementById("m1-mc"),
+  "m1-rel-mel",
+  "Lesão pigmentada escura em neoplasia de pele sugere produção aumentada de:",
+  [
+    "Melanina",
+    "Hemossiderina",
+    "Fibrina",
+    "Triglicerídeos"
+  ],
+  0
+);
+
+makeChoiceQuestion(
+  document.getElementById("m1-mc"),
+  "m1-rel-melanoma",
+  "Qual característica está mais relacionada ao comportamento maligno do melanoma?",
+  [
+    "Capacidade de invasão e metástase",
+    "Presença de cápsula bem delimitada",
+    "Ausência de atipias",
+    "Arquitetura preservada"
+  ],
+  0
+);
+
+/* ================= TEÓRICA MÓDULO 2 ================= */
+
+/* LACUNAS: 1 de cada processo */
+makeInput(document.getElementById("m2-lacunas"),"m2lac-hiperemia-ativa","Hiperemia ativa: aumento ________ do fluxo sanguíneo arterial por vasodilatação.",["ativo"]);
+makeInput(document.getElementById("m2-lacunas"),"m2lac-congestao","Hiperemia passiva/congestão: acúmulo de sangue por dificuldade de drenagem ________.",["venosa"]);
+makeInput(document.getElementById("m2-lacunas"),"m2lac-edema","Edema: acúmulo de líquido no interstício ou cavidades, frequentemente por aumento da pressão ________.",["hidrostatica","hidrostática"]);
+makeInput(document.getElementById("m2-lacunas"),"m2lac-trombose","Trombose: formação de massa sanguínea sólida dentro do vaso durante a ________.",["vida"]);
+makeInput(document.getElementById("m2-lacunas"),"m2lac-zahn","As linhas de ________ indicam alternância de plaquetas/fibrina e hemácias em trombo formado em vida.",["zahn"]);
+makeInput(document.getElementById("m2-lacunas"),"m2lac-embolia","Embolia: obstrução vascular por massa transportada pelo ________.",["sangue","fluxo sanguineo","fluxo sanguíneo"]);
+makeInput(document.getElementById("m2-lacunas"),"m2lac-tep","Tromboembolia pulmonar geralmente se origina de trombose venosa ________ de membros inferiores.",["profunda"]);
+makeInput(document.getElementById("m2-lacunas"),"m2lac-infarto-branco","Infarto branco ocorre em órgãos sólidos com circulação geralmente ________, como coração e rim.",["terminal","unica","única"]);
+makeInput(document.getElementById("m2-lacunas"),"m2lac-infarto-vermelho","Infarto vermelho é típico de órgãos com dupla circulação ou tecido frouxo, como o ________.",["pulmao","pulmão"]);
+makeInput(document.getElementById("m2-lacunas"),"m2lac-choque","Choque é hipoperfusão sistêmica que causa hipóxia ________ e disfunção orgânica.",["tecidual"]);
+
+/* VERDADEIRO OU FALSO */
+makeVF(document.getElementById("m2-vf"),"m2vf-hiperemia-ativa","Hiperemia ativa é um processo ativo por vasodilatação arteriolar e aumento do fluxo sanguíneo.",true);
+makeVF(document.getElementById("m2-vf"),"m2vf-congestao","Congestão é um processo passivo causado por dificuldade de drenagem venosa.",true);
+makeVF(document.getElementById("m2-vf"),"m2vf-edema-pulmonar","Edema pulmonar por insuficiência ventricular esquerda decorre de aumento da pressão hidrostática nos capilares pulmonares.",true);
+makeVF(document.getElementById("m2-vf"),"m2vf-trombose","Trombose depende da tríade de Virchow: lesão endotelial, alteração do fluxo e hipercoagulabilidade.",true);
+makeVF(document.getElementById("m2-vf"),"m2vf-zahn","Linhas de Zahn favorecem trombo formado em vida, e não simples coágulo post-mortem.",true);
+makeVF(document.getElementById("m2-vf"),"m2vf-tep-sempre-infarta","Tromboembolia pulmonar sempre causa infarto pulmonar.",false,"O pulmão tem dupla circulação; o infarto depende do calibre acometido e da reserva circulatória.");
+makeVF(document.getElementById("m2-vf"),"m2vf-infarto-branco","Infarto branco é típico de órgãos sólidos com circulação terminal, como coração, rim e baço.",true);
+makeVF(document.getElementById("m2-vf"),"m2vf-infarto-vermelho","Infarto vermelho pode ocorrer no pulmão porque há dupla circulação e tendência a extravasamento hemorrágico.",true);
+makeVF(document.getElementById("m2-vf"),"m2vf-choque","Choque é apenas sinônimo de pressão baixa, sem relação obrigatória com hipoperfusão tecidual.",false,"Choque é definido por hipoperfusão sistêmica, hipóxia celular e disfunção orgânica.");
+
+/* MECANISMO CERTO DO PROCESSO */
+makeChoiceQuestion(document.getElementById("m2-mc"),"m2mec-hiperemia-ativa","Mecanismo correto da hiperemia ativa:",["Vasodilatação arteriolar com aumento ativo do fluxo sanguíneo","Obstrução da drenagem venosa","Trombo venoso que emboliza para o pulmão","Necrose isquêmica hemorrágica"],0);
+makeChoiceQuestion(document.getElementById("m2-mc"),"m2mec-congestao","Mecanismo correto da congestão/hiperemia passiva:",["Dificuldade de drenagem venosa com acúmulo passivo de sangue","Aumento ativo do fluxo arterial por exercício","Acúmulo de triglicerídeos em hepatócitos","Inalação de pigmento carbonáceo"],0);
+makeChoiceQuestion(document.getElementById("m2-mc"),"m2mec-edema","Mecanismo correto do edema pulmonar cardiogênico:",["Aumento da pressão hidrostática por insuficiência ventricular esquerda","Redução local de melanina","Vasodilatação arteriolar fisiológica","Digestão enzimática completa do parênquima"],0);
+makeChoiceQuestion(document.getElementById("m2-mc"),"m2mec-trombose","Mecanismo geral da trombose:",["Lesão endotelial, estase/turbulência e hipercoagulabilidade","Falha da bomba Na+/K+ com entrada de água","Resposta granulomatosa crônica","Deposição de pigmento exógeno"],0);
+makeChoiceQuestion(document.getElementById("m2-mc"),"m2mec-embolia","Mecanismo correto da embolia:",["Material intravascular desloca-se pelo sangue e obstrui vaso distante","Célula aumenta de volume por maior síntese proteica","Pigmento de carbono é fagocitado por macrófagos","Hepatócito acumula triglicerídeos"],0);
+makeChoiceQuestion(document.getElementById("m2-mc"),"m2mec-tep","Mecanismo correto da tromboembolia pulmonar:",["Trombo venoso profundo se desprende e impacta na circulação pulmonar","Aterosclerose coronariana causa área branca no miocárdio","Vasodilatação ativa causa rubor local","Insuficiência renal causa pigmento melânico"],0);
+makeChoiceQuestion(document.getElementById("m2-mc"),"m2mec-infarto-branco","Mecanismo correto do infarto branco do miocárdio:",["Obstrução arterial coronariana causando necrose isquêmica coagulativa","Congestão venosa com alvéolos cheios de sangue","Inflamação supurativa com pus líquido","Deposição de hemossiderina em macrófagos"],0);
+makeChoiceQuestion(document.getElementById("m2-mc"),"m2mec-infarto-vermelho","Mecanismo correto do infarto vermelho pulmonar:",["Necrose isquêmica com hemorragia em órgão de dupla circulação ou previamente congesto","Acúmulo de gordura por deficiência de apoproteínas","Aumento do tamanho dos cardiomiócitos por HAS","Deposição de carbono em macrófagos alveolares"],0);
+makeChoiceQuestion(document.getElementById("m2-mc"),"m2mec-choque","Mecanismo central do choque:",["Hipoperfusão sistêmica levando à hipóxia celular e disfunção orgânica","Aumento ativo do fluxo arterial localizado","Obstrução de uma artéria pequena sem repercussão sistêmica","Pigmentação pulmonar por carbono"],0);
+
+/* CASOS CLÍNICOS POR PROCESSO */
+makeChoiceQuestion(document.getElementById("m2-mc"),"m2caso-hiperemia-ativa","Caso: área inflamada está avermelhada, quente e com aumento ativo do fluxo arterial. Processo:",["Hiperemia ativa","Congestão passiva","Infarto branco","Tromboembolia"],0);
+makeChoiceQuestion(document.getElementById("m2-mc"),"m2caso-congestao","Caso: órgão pesado e arroxeado por dificuldade de retorno venoso. Processo:",["Congestão/hiperemia passiva","Hiperemia ativa","Esteatose hepática","Necrose caseosa"],0);
+makeChoiceQuestion(document.getElementById("m2-mc"),"m2caso-edema","Caso: paciente com insuficiência ventricular esquerda elimina espuma rósea; alvéolos contêm líquido. Processo:",["Edema pulmonar","Antracose","Melanose","Infarto branco renal"],0);
+makeChoiceQuestion(document.getElementById("m2-mc"),"m2caso-trombose","Caso: massa aderida à parede vascular com fibrina, plaquetas e hemácias organizadas. Processo:",["Trombose","Coágulo post-mortem simples","Degeneração hidrópica","Hemossiderose"],0);
+makeChoiceQuestion(document.getElementById("m2-mc"),"m2caso-embolia","Caso: fragmento de trombo se desprende e obstrui vaso distante. Processo:",["Tromboembolia","Hiperemia ativa","Esteatose","Necrose caseosa"],0);
+makeChoiceQuestion(document.getElementById("m2-mc"),"m2caso-tep","Caso: paciente com varizes, obesidade e longa viagem evolui com dispneia súbita e choque. Processo:",["Tromboembolia pulmonar","Hiperemia ativa","Esteatose hepática","Necrose liquefativa"],0);
+makeChoiceQuestion(document.getElementById("m2-mc"),"m2caso-infarto-branco","Caso: paciente com aterosclerose coronariana apresenta área pálida no miocárdio. Processo:",["Infarto branco do miocárdio","Infarto vermelho pulmonar","Congestão hepática","Antracose"],0);
+makeChoiceQuestion(document.getElementById("m2-mc"),"m2caso-infarto-vermelho","Caso: pulmão apresenta área vermelho-escura e hemorrágica após obstrução vascular. Processo:",["Infarto vermelho pulmonar","Infarto branco do miocárdio","Degeneração hidrópica","Melanose"],0);
+makeChoiceQuestion(document.getElementById("m2-mc"),"m2caso-choque","Caso: paciente hipotenso, confuso, frio, com hipoperfusão sistêmica e disfunção orgânica. Processo:",["Choque","Hiperemia ativa","Antracose","Melanose"],0);
+
+/* RELAÇÃO CAUSA → PROCESSO / PROCESSO → DESFECHO */
+
+makeChoiceQuestion(
+  document.getElementById("m2-mc"),
+  "m2-rel-ha",
+  "Durante exercício físico, musculatura fica avermelhada e quente. Qual mecanismo explica isso?",
+  [
+    "Vasodilatação arteriolar com hiperemia ativa",
+    "Obstrução venosa passiva",
+    "Trombose arterial",
+    "Necrose hemorrágica"
+  ],
+  0
+);
+
+makeChoiceQuestion(
+  document.getElementById("m2-mc"),
+  "m2-rel-hp",
+  "Insuficiência cardíaca direita pode causar congestão hepática porque ocorre:",
+  [
+    "Dificuldade do retorno venoso",
+    "Aumento ativo do fluxo arterial",
+    "Digestão enzimática do fígado",
+    "Acúmulo de triglicerídeos"
+  ],
+  0
+);
+
+makeChoiceQuestion(
+  document.getElementById("m2-mc"),
+  "m2-rel-ed",
+  "Paciente com edema pulmonar cardiogênico apresenta líquido nos alvéolos devido a:",
+  [
+    "Aumento da pressão hidrostática capilar",
+    "Produção excessiva de melanina",
+    "Necrose granulomatosa",
+    "Acúmulo de carbono"
+  ],
+  0
+);
+
+makeChoiceQuestion(
+  document.getElementById("m2-mc"),
+  "m2-rel-tromb",
+  "Paciente acamado por longo período desenvolve trombose venosa profunda. Qual fator da tríade de Virchow predomina?",
+  [
+    "Estase sanguínea",
+    "Vasodilatação arterial",
+    "Produção de melanina",
+    "Digestão enzimática"
+  ],
+  0
+);
+
+makeChoiceQuestion(
+  document.getElementById("m2-mc"),
+  "m2-rel-tep",
+  "Qual desfecho grave pode ocorrer após trombose venosa profunda?",
+  [
+    "Tromboembolia pulmonar",
+    "Esteatose hepática",
+    "Melanose",
+    "Antracose"
+  ],
+  0
+);
+
+makeChoiceQuestion(
+  document.getElementById("m2-mc"),
+  "m2-rel-infbranco",
+  "Paciente com infarto branco do miocárdio evolui para óbito. Qual processo levou diretamente a isso?",
+  [
+    "Necrose isquêmica do músculo cardíaco",
+    "Acúmulo de carbono nos pulmões",
+    "Pigmentação melânica",
+    "Entrada de água intracelular"
+  ],
+  0
+);
+
+makeChoiceQuestion(
+  document.getElementById("m2-mc"),
+  "m2-rel-infvermelho",
+  "Qual situação está mais relacionada ao infarto vermelho pulmonar?",
+  [
+    "Tromboembolia pulmonar",
+    "Deficiência de apoproteínas",
+    "Produção de melanina",
+    "Hipertrofia cardíaca"
+  ],
+  0
+);
+
+makeChoiceQuestion(
+  document.getElementById("m2-mc"),
+  "m2-rel-choque",
+  "No choque, a principal consequência sistêmica da hipoperfusão é:",
+  [
+    "Hipóxia tecidual e falência orgânica",
+    "Produção de melanina",
+    "Acúmulo de triglicerídeos",
+    "Pigmentação carbonácea"
+  ],
+  0
+);
+
+/* DIFERENCIAIS DO MÓDULO 2 */
+makeMultiCheck(document.getElementById("m2-mc"),"m2dif-virchow","Selecione os componentes da tríade de Virchow:",["Lesão endotelial","Estase ou turbulência","Hipercoagulabilidade","Acúmulo de melanina","Degeneração hidrópica"],new Set([0,1,2]));
+makeMultiCheck(document.getElementById("m2-mc"),"m2dif-infarto-branco","Selecione características do infarto branco:",["Órgãos sólidos","Circulação terminal","Área pálida","Necrose coagulativa","Hemorragia difusa obrigatória"],new Set([0,1,2,3]));
+makeMultiCheck(document.getElementById("m2-mc"),"m2dif-infarto-vermelho","Selecione características do infarto vermelho pulmonar:",["Órgão com dupla circulação","Área hemorrágica vermelho-escura","Pode ocorrer após tromboembolia pulmonar","Necrose com extravasamento de sangue","Sempre ocorre no miocárdio"],new Set([0,1,2,3]));
+
+/* ================= PRÁTICA ================= */
+const practicalQuestions = [
+{
+  id:"p1",
+  title:"Lâmina 1",
+  img:"https://i.imgur.com/npwO6GI.png",
+  acceptedName:["hipertrofia cardiaca","hipertrofia cardíaca"],
+  featuresMicro:["Cardiomiócitos aumentados de volume","Núcleos aumentados","Fibras miocárdicas espessadas","Granuloma com necrose caseosa central"],
+  correctMicro:[0,1,2],
+  featuresMacro:["Parede ventricular espessada","Redução relativa da cavidade ventricular","Aumento do volume e peso","Área hemorrágica pulmonar"],
+  correctMacro:[0,1,2],
+  causes:["Hipertensão arterial crônica","Estenose valvar aórtica","Inalação de carbono","Desnutrição proteico-calórica"],
+  correctCauses:[0,1]
+},
+{
+  id:"p2",
+  title:"Lâmina 2",
+  img:"https://i.imgur.com/yViUgwu.jpeg",
+  acceptedName:["degeneracao hidropica","degeneração hidrópica"],
+  featuresMicro:["Células tumefeitas/edemaciadas","Citoplasma claro ou vacuolizado por água","Núcleo geralmente preservado","Linhas de Zahn"],
+  correctMicro:[0,1,2],
+  featuresMacro:["Órgão pode estar aumentado","Órgão pode estar pálido","Orgão mais pesado","Área necrótica friável tipo queijo"],
+  correctMacro:[0,1,2],
+  causes:["Hipóxia leve","Lesão tóxica reversível","Falha da bomba Na+/K+ ATPase","Tromboembolia pulmonar"],
+  correctCauses:[0,1,2]
+},
+{
+  id:"p3",
+  title:"Lâmina 3",
+  img:"https://i.imgur.com/cqDHv5I.jpeg",
+  acceptedName:["esteatose hepatica","esteatose hepática","degeneracao gordurosa","degeneração gordurosa"],
+  featuresMicro:["Vacúolos claros de gordura nos hepatócitos","Núcleo deslocado perifericamente em macrovesicular","Acúmulo de triglicerídeos","Pigmento carbônico em macrófagos alveolares"],
+  correctMicro:[0,1,2],
+  featuresMacro:["Fígado aumentado","Fígado amarelado","Órgão friável/gorduroso","Pulmão pesado e úmido"],
+  correctMacro:[0,1,2],
+  causes:["Desnutrição proteico-calórica","Alcoolismo","Diabetes/obesidade","Inalação de carbono"],
+  correctCauses:[0,1,2]
+},
+{
+  id:"p4",
+  title:"Lâmina 4",
+  img:"https://i.imgur.com/z1FHKV4.jpeg",
+  acceptedName:["antracose","antracose pulmonar"],
+  featuresMicro:["Pigmento negro/carbonáceo","Macrófagos carregados de pigmento","Arquitetura pulmonar relativamente preservada","Vacúolos lipídicos em hepatócitos"],
+  correctMicro:[0,1,2],
+  featuresMacro:["Pigmentação escura no pulmão","Pode aparecer em regiões peribrônquicas","Associada à exposição ambiental/poluição","Área pálida no miocárdio"],
+  correctMacro:[0,1,2],
+  causes:["Inalação de partículas de carbono","Poluição urbana/fumaça","Tabagismo/exposição ocupacional","Degeneração de hemoglobina"],
+  correctCauses:[0,1,2]
+},
+{
+  id:"p4.1",
+  title:"Lâmina 4.1",
+  img:"https://i.imgur.com/QgZFANN.jpeg",
+  acceptedName:["melanose","melanoma","pigmento melanico","pigmento melânico"],
+  featuresMicro:["Pigmento marrom-enegrecido","Celulas malignas com intenso pleomorfismo celular(tamanhos e fromas variavéis","Nucleos irregulares e abundancia de melanina intracelular","Pigmento carbônico em macrófagos alveolares"],
+  correctMicro:[0,1,2],
+  featuresMacro:["Área/tecido com pigmentação escura","Bordos irregulares e heterogeneidade de cor","Pode estar associada a lesões melanocíticas","Fígado amarelado e friável"],
+  correctMacro:[0,1,2],
+  causes:["Produção/acúmulo de melanina","Proliferação melanocítica","Degeneração de hemoglobina","Tromboembolismo pulmonar"],
+  correctCauses:[0,1]
+},
+{
+  id:"p4.2",
+  title:"Lâmina 4.2",
+  img:"https://i.imgur.com/N91rTy9.png",
+  acceptedName:["hemossiderose","hemossiderina","pigmento hemossiderina","congestao cronica com hemossiderina","congestão crônica com hemossiderina"],
+  featuresMicro:["Pigmento granular castanho-amarelado","Pigmento derivado da degradação da hemoglobina","Pode aparecer em macrófagos","No pulmão, pode formar células da insuficiência cardíaca"],
+  correctMicro:[0,1,2,3],
+  featuresMacro:["Pode ocorrer em áreas de hemorragia antiga","Pode ocorrer em congestão crônica","Pigmentação acastanhada","Área pálida de infarto branco"],
+  correctMacro:[0,1,2],
+  causes:["Lise excessiva de hemácias","Anemia hemolítica","Hiperemia passiva com derrame nos alveolos","Inalação de carbono"],
+  correctCauses:[0,1,2]
+},
+{
+  id:"p5",
+  title:"Lâmina 5)",
+  img:"https://i.imgur.com/qQ8Z0mD.png",
+  acceptedName:["necrose coagulativa"],
+  featuresMicro:["Arquitetura tecidual inicialmente preservada","Perda dos núcleos","Citoplasma mais eosinofílico","Pus líquido com perda total da arquitetura"],
+  correctMicro:[0,1,2],
+  featuresMacro:["Área pálida/esbranquiçada","Pode ter formato triangular/cuneiforme","Ocorre em órgão sólido","Área difusamente hemorrágica típica de pulmão"],
+  correctMacro:[0,1,2],
+  causes:["Isquemia arterial","Trombose","Embolia","Inalação de carbono"],
+  correctCauses:[0,1,2]
+},
+{
+  id:"p6",
+  title:"Lâmina 6",
+  img:"https://i.imgur.com/Ll18t3c.jpeg",
+  acceptedName:["necrose liquefativa"],
+  featuresMicro:["Perda da arquitetura tecidual","Digestão enzimática intensa","Pode haver infiltrado neutrofílico","Presença de colônias bacterianas, dispostas em agrupamentos circulares mais corados."],
+  correctMicro:[0,1,2,3],
+  featuresMacro:["Aspecto amolecido/liquefeito","Pode formar cavidade","Pode formar pus em abscesso","Área seca e pálida obrigatória"],
+  correctMacro:[0,1,2],
+  causes:["Infecção bacteriana supurativa","Abscesso","Lesão isquêmica no SNC","Hipertensão arterial crônica"],
+  correctCauses:[0,1,2]
+},
+{
+  id:"p7",
+  title:"Lâmina 7",
+  img:"https://i.imgur.com/BTQPAkS.jpeg",
+  acceptedName:["necrose caseosa","granuloma caseoso"],
+  featuresMicro:["Material amorfo eosinofílico central","Granuloma com macrófagos epitelioides","Pode haver células gigantes","Linhas de Zahn"],
+  correctMicro:[0,1,2],
+  featuresMacro:["Aspecto branco-amarelado friável","Aspecto semelhante a queijo","Lesão granulomatosa","Fígado amarelado e gorduroso"],
+  correctMacro:[0,1,2],
+  causes:["Tuberculose","Inflamação granulomatosa crônica","Algumas infecções fúngicas","Tromboembolismo pulmonar"],
+  correctCauses:[0,1,2]
+},
+{
+  id:"p7.1",
+  title:"Lâmina 7.1",
+  img:"https://i.imgur.com/H18KdYV.png",
+  acceptedName:["hiperemia ativa","hiperemia"],
+  featuresMicro:["Vasos dilatados e cheios de sangue","Aumento ativo do fluxo sanguíneo arterial","Capilares/arteríolas ingurgitados","Dificuldade de drenagem venosa como mecanismo principal"],
+  correctMicro:[0,1,2],
+  featuresMacro:["Tecido avermelhado","Tecido mais quente","Aumento de volume","Órgão cianótico por estase venosa"],
+  correctMacro:[0,1,2],
+  causes:["Inflamação aguda","Exercício","Vasodilatação arteriolar","Trombose venosa profunda"],
+  correctCauses:[0,1,2]
+},
+{
+  id:"p8",
+  title:"Lâmina 8",
+  img:"https://i.imgur.com/Ws3xhET.png",
+  acceptedName:["congestao pulmonar","congestão pulmonar","edema pulmonar","hiperemia passiva","congestao","congestão","congestao passiva","congestão passiva"],
+  featuresMicro:["Capilares septais congestos","Edema nos alvéolos do tipo transudato","Macrófagos com hemossiderina podem aparecer na crônica","Fígado amarelado por triglicerídeos"],
+  correctMicro:[0,1,2],
+  featuresMacro:["Pulmão pesado e úmido","Pode haver espuma rósea","Órgão pode ficar vermelho-azulado/congesto","Área pálida e seca no miocárdio"],
+  correctMacro:[0,1,2],
+  causes:["Insuficiência ventricular esquerda","Aumento da pressão hidrostática pulmonar","Dificuldade de drenagem venosa","Desnutrição proteico-calórica"],
+  correctCauses:[0,1,2]
+},
+{
+  id:"p9",
+  title:"Lâmina 9",
+  img:"https://i.imgur.com/wXCCuVA.jpeg",
+  acceptedName:["trombose","trombose venosa profunda","trombo"],
+  featuresMicro:["Massa intravascular aderida à parede","Linhas de Zahn podem estar presentes","Fibrina, plaquetas e hemácias organizadas","Células tumefeitas por água intracelular"],
+  correctMicro:[0,1,2],
+  featuresMacro:["Massa sólida avermelhada ou esbranquiçada aderida ao vaso","Alternancia de cor e estrutura friavel","Pode ser fonte de êmbolo","Pigmentação negra pulmonar"],
+  correctMacro:[0,1,2],
+  causes:["Lesão endotelial","Estase/turbulência","Hipercoagulabilidade","Acúmulo de melanina"],
+  correctCauses:[0,1,2]
+},
+{
+  id:"p10",
+  title:"Lâmina 10",
+  img:"https://i.imgur.com/bvzy9sH.jpeg",
+  acceptedName:["tromboembolia pulmonar","embolia pulmonar","tromboembolia"],
+  featuresMicro:["Êmbolo/trombo em ramo arterial pulmonar","Obstrução da luz vascular","Material trombótico intravascular","Vacúolos lipídicos nos hepatócitos"],
+  correctMicro:[0,1,2],
+  featuresMacro:["Pode causar morte súbita se grande vaso for acometido","Pode causar infarto pulmonar","Relacionada a trombose venosa profunda","Fígado aumentado e amarelado"],
+  correctMacro:[0,1,2],
+  causes:["Pedaço de um trombo prévio que fragmnetou e viajou pela corrente sanguinea","Entrada de gases, liquido amniotico(parto), placas de ateroma","Viagem longa/estase venosa","Inalação de carbono"],
+  correctCauses:[0,1,2]
+},
+{
+  id:"p10.1",
+  title:"Lâmina 10.1",
+  img:"https://i.imgur.com/DKK4TzW.jpeg",
+  acceptedName:["infarto branco do miocardio","infarto branco do miocárdio","infarto branco","necrose coagulativa do miocardio","necrose coagulativa do miocárdio"],
+  featuresMicro:["Necrose coagulativa","Arquitetura tecidual inicialmente preservada","Perda nuclear","Alvéolos preenchidos por sangue"],
+  correctMicro:[0,1,2],
+  featuresMacro:["Área pálida/esbranquiçada no miocárdio","Aspecto de cunha","Borda vermelha ao redor da área infartada(halo periferico hiperemico), reflexo da inflamação reativa.","Área hemorrágica difusa típica de pulmão"],
+  correctMacro:[0,1,2],
+  causes:["Oclusão arterial abrupta (isquemia profunda e aguda) em orgãos sólidos de circulação terminal única","Trombose coronariana","Embolia arterial coronariana","Congestão passiva pulmonar"],
+  correctCauses:[0,1,2]
+},
+{
+  id:"p11",
+  title:"Lâmina 11",
+  img:"https://i.imgur.com/UYlr026.jpeg",
+  acceptedName:["infarto vermelho","infarto vermelho pulmonar"],
+  featuresMicro:["Necrose coagulativa com hemorragia","Alvéolos preenchidos por sangue","Hemácias extravasadas na área infartada","Pigmento carbônico como achado principal"],
+  correctMicro:[0,1,2],
+  featuresMacro:["Área vermelho-escura/hemorrágica no tecido","Area branca","Area marrom","Área pálida típica de coração como regra"],
+  correctMacro:[0],
+  causes:["Tromboembolia pulmonar","Obstrução vascular em órgão com dupla circulação","Congestão venosa associada","Desnutrição proteico-calórica"],
+  correctCauses:[0,1,2]
+}
+];
+
+const pratica = document.getElementById("pratica-imgs");
+practicalQuestions.forEach(q => makeImageQuestion(pratica,q));
+
+updateScore();
+
+function finishGame(){
+  const pct=total?Math.round((score/total)*100):0;
+  const res=document.getElementById("result");
+  let msg="Continue revisando mecanismos, macro e micro.";
+  if(pct>=85)msg="Excelente! Você está muito forte para pato.";
+  else if(pct>=65)msg="Bom desempenho! Revise principalmente os diferenciais.";
+  else if(pct>=45)msg="Base em construção: foque em mecanismo + morfologia.";
+  res.style.display="block";
+  res.innerHTML=`<h2>Resultado final</h2><p class="score">${score}/${total} pontos (${pct}%)</p><p>${msg}</p>`;
+  res.scrollIntoView({behavior:"smooth"});
+}
+function resetGame(){location.reload();}
+</script>
+</body>
+</html>

@@ -1,0 +1,2401 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<title>Jornada na APS</title>
+
+<style>
+body {
+  margin: 0;
+  background: #222;
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+}
+
+#game {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+}
+
+.screen {
+  position: absolute;
+  inset: 0;
+  display: none;
+}
+
+.active {
+  display: block;
+}
+
+#menu {
+  background-image: url("https://i.imgur.com/zKi4EOr.jpeg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+#menu.active {
+  display: flex;
+}
+
+#chooseVideo {
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    z-index:0;
+}
+
+.characterHotspot{
+    z-index:10;
+}
+
+#choose.active {
+  display: block;
+}
+
+.characterHotspot {
+  position: absolute;
+  bottom: 8%;
+  width: 220px;
+  height: 70px;
+  cursor: pointer;
+  z-index: 3;
+  background: #2f7d46;
+  color: white;
+  font-size: 22px;
+  font-weight: bold;
+  border-radius: 14px;
+}
+
+.characterHotspot:hover {
+  background: #256b3b;
+}
+
+#prof1Btn {
+  left: 26%;
+}
+
+#prof2Btn {
+  left: 58%;
+}
+
+button {
+  padding: 14px 28px;
+  margin: 10px;
+  border: none;
+  border-radius: 10px;
+  background: #2f7d46;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+h1 {
+  font-size: 48px;
+  color: #2f7d46;
+}
+
+#startButton{
+position:absolute;
+left:22%;
+top:59%;
+transform:translate(-50%,-50%);
+width:270px;
+height:74px;
+background:#000000;
+color:#ffffff;
+border:4px solid #000000;
+border-radius:18px;
+font-size:30px;
+font-weight:bold;
+cursor:pointer;
+box-shadow:0 8px 20px rgba(0,0,0,.35);
+transition:.2s;
+}
+
+#startButton:hover{
+background:#000000;
+transform:translate(-50%,-50%) scale(1.08);
+}
+
+#mapBackground {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#player {
+  position: absolute;
+  width: 85px;
+  height: 120px;
+  left: 50%;
+  top: 70%;
+  transform: translateX(-50%);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: 5;
+}
+
+#hint {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 15px 25px;
+  border-radius: 12px;
+  border: 3px solid #333;
+  display: none;
+  font-size: 20px;
+  z-index: 10;
+}
+
+#room {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+#roomTitle {
+  position: absolute;
+  top: 30px;
+  left: 40px;
+  font-size: 36px;
+  font-weight: bold;
+  color: #111;
+  background: rgba(255,255,255,0.8);
+  padding: 8px 18px;
+  border-radius: 12px;
+}
+
+.npc {
+  position: absolute;
+  width: 180px;
+  height: 400px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: pointer;
+  z-index: 4;
+}
+
+#dialog {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  background: white;
+  border: 4px solid #333;
+  border-radius: 14px;
+  padding: 20px;
+  font-size: 20px;
+  display: none;
+  z-index: 20;
+}
+
+#backBtn {
+  position: absolute;
+  right: 40px;
+  top: 30px;
+  z-index: 20;
+}
+
+#missionBox {
+  position: absolute;
+  right: 25px;
+  bottom: 25px;
+  display: none;
+  width: 310px;
+  background: rgba(255,255,255,0.92);
+  border: 3px solid #333;
+  border-radius: 14px;
+  padding: 15px;
+  z-index: 15;
+  font-size: 17px;
+  line-height: 1.4;
+}
+
+#missionBox h2 {
+  margin: 0 0 10px 0;
+  color: #2f7d46;
+  font-size: 26px;
+}
+
+.missionItem {
+  margin-bottom: 8px;
+}
+
+.missionDone {
+  text-decoration: line-through;
+  color: #2f7d46;
+  font-weight: bold;
+}
+
+#introDialog {
+  position: absolute;
+  left: 50%;
+  bottom: 90px;
+  transform: translateX(-50%);
+  width: 650px;
+  max-width: 85vw;
+  background: white;
+  border: 4px solid #333;
+  border-radius: 16px;
+  padding: 24px;
+  z-index: 30;
+  font-size: 20px;
+  text-align: center;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.35);
+}
+
+#introDialog h2 {
+  margin-top: 0;
+  color: #2f7d46;
+}
+
+#introDialog p {
+  margin: 10px 0;
+}
+
+#missionCompleteMessage {
+  position: absolute;
+  top: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ffffff;
+  border: 3px solid #2f7d46;
+  border-radius: 14px;
+  padding: 14px 24px;
+  font-size: 20px;
+  font-weight: bold;
+  z-index: 40;
+  display: none;
+}
+
+#memoryOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+#memoryModal {
+  width: 720px;
+  max-width: 90vw;
+  background: white;
+  border: 4px solid #333;
+  border-radius: 18px;
+  padding: 25px;
+  text-align: center;
+}
+
+#memoryModal h2 {
+  margin-top: 0;
+  color: #2f7d46;
+}
+
+#memoryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin: 25px 0;
+}
+
+.memoryCard {
+  height: 95px;
+  background: #2f7d46;
+  color: white;
+  border: 3px solid #1f5730;
+  border-radius: 14px;
+  font-size: 17px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 8px;
+  text-align: center;
+}
+
+.memoryCard.flipped {
+  background: #f4ead2;
+  color: #111;
+}
+
+.memoryCard.matched {
+  background: #b7e3c0;
+  color: #111;
+  cursor: default;
+}
+
+.dialogButton {
+  margin-top: 14px;
+  font-size: 18px;
+}
+
+
+.collectible {
+  position: absolute;
+  min-width: 86px;
+  min-height: 76px;
+  background: rgba(255,255,255,0.92);
+  border: 3px solid #333;
+  border-radius: 16px;
+  padding: 8px;
+  cursor: pointer;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+  box-shadow: 0 5px 12px rgba(0,0,0,0.25);
+}
+
+.collectible .itemIcon {
+  font-size: 34px;
+  line-height: 1;
+}
+
+.collectible:hover {
+  transform: scale(1.06);
+}
+
+.collectible.collected {
+  display: none;
+}
+
+#collectionStatus {
+  position: absolute;
+  left: 40px;
+  bottom: 35px;
+  width: 320px;
+  background: rgba(255,255,255,0.94);
+  border: 3px solid #333;
+  border-radius: 14px;
+  padding: 14px;
+  z-index: 15;
+  font-size: 17px;
+  line-height: 1.35;
+  display: none;
+}
+
+#collectionStatus strong {
+  color: #2f7d46;
+}
+
+
+#dialog p {
+  margin: 0 0 10px 0;
+}
+
+#quizOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+#quizModal {
+  width: 760px;
+  max-width: 90vw;
+  background: white;
+  border: 4px solid #333;
+  border-radius: 18px;
+  padding: 25px;
+  text-align: center;
+}
+
+#quizModal h2 {
+  margin-top: 0;
+  color: #2f7d46;
+}
+
+#quizQuestion {
+  margin: 22px auto;
+  padding: 18px;
+  background: #f4ead2;
+  border: 3px solid #333;
+  border-radius: 14px;
+  font-size: 21px;
+  font-weight: bold;
+  line-height: 1.35;
+}
+
+#quizOptions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin: 20px 0;
+}
+
+.quizOption {
+  min-height: 68px;
+  background: #2f7d46;
+  color: white;
+  border: 3px solid #1f5730;
+  border-radius: 14px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 12px;
+}
+
+.quizOption.correct {
+  background: #b7e3c0;
+  color: #111;
+}
+
+.quizOption.wrong {
+  background: #e8a7a7;
+  color: #111;
+}
+
+#quizFeedback {
+  min-height: 30px;
+  font-size: 20px;
+  font-weight: bold;
+  margin-top: 8px;
+}
+
+#quizProgress {
+  margin-top: 12px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+
+#albumOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+#albumModal {
+  width: 860px;
+  max-width: 92vw;
+  max-height: 92vh;
+  overflow: auto;
+  background: #fff8e8;
+  border: 4px solid #333;
+  border-radius: 20px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.4);
+}
+
+#albumModal h2 {
+  margin-top: 0;
+  color: #2f7d46;
+}
+
+#albumPage {
+  background: #f4ead2;
+  border: 4px solid #333;
+  border-radius: 18px;
+  padding: 18px;
+  margin: 18px auto;
+  max-width: 720px;
+}
+
+#albumImageFrame {
+  width: 100%;
+  height: 330px;
+  background: white;
+  border: 4px solid #333;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+#albumImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+}
+
+#albumPlaceholder {
+  color: #555;
+  font-size: 22px;
+  font-weight: bold;
+  padding: 20px;
+}
+
+#albumCaptionPrompt {
+  margin-top: 14px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+#albumOptions {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 12px;
+  margin: 16px auto 0 auto;
+  max-width: 720px;
+}
+
+.albumOption {
+  min-height: 58px;
+  background: #2f7d46;
+  color: white;
+  border: 3px solid #1f5730;
+  border-radius: 14px;
+  font-size: 17px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 12px;
+}
+
+.albumOption.correct {
+  background: #b7e3c0;
+  color: #111;
+}
+
+.albumOption.wrong {
+  background: #e8a7a7;
+  color: #111;
+}
+
+#albumFeedback {
+  min-height: 30px;
+  margin-top: 12px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+#albumProgress {
+  margin-top: 10px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* MISSÕES FINAIS - FM */
+
+#apsOverlay,
+#referencesOverlay,
+#finalOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.58);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 120;
+}
+
+#apsModal,
+#referencesModal,
+#finalModal {
+  width: 850px;
+  max-width: 92vw;
+  max-height: 92vh;
+  overflow: auto;
+  background: #fff8e8;
+  border: 4px solid #333;
+  border-radius: 22px;
+  padding: 26px;
+  text-align: center;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.4);
+}
+
+#apsModal h2,
+#referencesModal h2,
+#finalModal h2 {
+  margin-top: 0;
+  color: #2f7d46;
+}
+
+#apsLetters {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  margin: 26px 0;
+}
+
+.apsLetter {
+  width: 135px;
+  height: 135px;
+  border-radius: 24px;
+  border: 4px solid #1f5730;
+  background: #2f7d46;
+  color: white;
+  font-size: 72px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 7px 14px rgba(0,0,0,0.25);
+}
+
+.apsLetter:hover {
+  transform: scale(1.06);
+}
+
+.apsLetter.opened {
+  background: #b7e3c0;
+  color: #111;
+}
+
+#apsCard {
+  background: white;
+  border: 4px solid #333;
+  border-radius: 18px;
+  padding: 20px;
+  min-height: 145px;
+  max-width: 720px;
+  margin: 0 auto 14px auto;
+  font-size: 20px;
+  line-height: 1.45;
+}
+
+#apsCard h3 {
+  margin-top: 0;
+  color: #2f7d46;
+}
+
+#apsProgress,
+#referencesProgress {
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 12px;
+}
+
+#referenceShelf {
+  max-width: 720px;
+  min-height: 155px;
+  margin: 18px auto;
+  padding: 16px;
+  background: #d8b47a;
+  border: 4px solid #5c3b1e;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.shelfBook {
+  background: #fff8e8;
+  border: 3px solid #333;
+  border-radius: 12px;
+  padding: 12px;
+  font-weight: bold;
+}
+
+#referenceOptions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  max-width: 760px;
+  margin: 20px auto;
+}
+
+.referenceBook {
+  min-height: 70px;
+  background: #2f7d46;
+  color: white;
+  border: 3px solid #1f5730;
+  border-radius: 14px;
+  padding: 12px;
+  font-size: 17px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.referenceBook.correct {
+  background: #b7e3c0;
+  color: #111;
+  cursor: default;
+}
+
+.referenceBook.wrong {
+  background: #e8a7a7;
+  color: #111;
+}
+
+#referencesFeedback {
+  min-height: 30px;
+  font-size: 20px;
+  font-weight: bold;
+  margin-top: 8px;
+}
+
+#finalModal {
+  background: #f4ead2;
+}
+
+#finalTrophy {
+  font-size: 82px;
+  margin-bottom: 8px;
+}
+
+#finalChecklist {
+  display: inline-block;
+  text-align: left;
+  background: white;
+  border: 3px solid #333;
+  border-radius: 16px;
+  padding: 18px 26px;
+  margin: 18px 0;
+  font-size: 20px;
+  line-height: 1.7;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="memoryOverlay">
+  <div id="memoryModal">
+    <h2>Jogo da Memória: Filipetas APS</h2>
+    <p>Encontre o conceito e sua definição correta.</p>
+
+    <div id="memoryGrid"></div>
+
+    <div id="memoryStatus">Pares encontrados: 0/4</div>
+
+    <button onclick="closeMemoryGame()">Fechar</button>
+  </div>
+</div>
+
+<div id="quizOverlay">
+  <div id="quizModal">
+    <h2>Quiz: Atributos da APS</h2>
+    <p>Identifique o atributo da APS representado em cada situação.</p>
+
+    <div id="quizQuestion"></div>
+    <div id="quizOptions"></div>
+    <div id="quizFeedback"></div>
+    <div id="quizProgress">Pergunta 1/6</div>
+
+    <button onclick="closeQuizGame()">Fechar</button>
+  </div>
+</div>
+
+
+<div id="albumOverlay">
+  <div id="albumModal">
+    <h2>Álbum da Oficina PSE</h2>
+    <p>Organize os registros do portfólio escolhendo a legenda correta para cada foto.</p>
+
+    <div id="albumPage">
+      <div id="albumImageFrame">
+        <img id="albumImage" src="" alt="Foto do registro da oficina">
+        <div id="albumPlaceholder"></div>
+      </div>
+      <div id="albumCaptionPrompt">Qual legenda combina com esta foto?</div>
+    </div>
+
+    <div id="albumOptions"></div>
+    <div id="albumFeedback"></div>
+    <div id="albumProgress">Foto 1/5</div>
+
+    <button onclick="closeAlbumGame()">Fechar</button>
+  </div>
+</div>
+
+<div id="apsOverlay">
+  <div id="apsModal">
+    <h2>Considerações Finais: APS</h2>
+    <p>Clique nas letras de APS para revelar os principais aprendizados da jornada.</p>
+
+    <div id="apsLetters">
+      <button class="apsLetter" id="apsLetterA" onclick="openAPSLetter('A')">A</button>
+      <button class="apsLetter" id="apsLetterP" onclick="openAPSLetter('P')">P</button>
+      <button class="apsLetter" id="apsLetterS" onclick="openAPSLetter('S')">S</button>
+    </div>
+
+    <div id="apsCard">
+      <h3>Escolha uma letra</h3>
+      <p>Ao abrir A, P e S, as considerações finais serão concluídas.</p>
+    </div>
+
+    <div id="apsProgress">Letras abertas: 0/3</div>
+    <button onclick="closeAPSGame()">Fechar</button>
+  </div>
+</div>
+
+<div id="referencesOverlay">
+  <div id="referencesModal">
+    <h2>Organizar a Biblioteca</h2>
+    <p>Selecione as referências corretas para colocar na estante do portfólio.</p>
+
+    <div id="referenceShelf">
+      <span>📚 Estante vazia</span>
+    </div>
+
+    <div id="referenceOptions"></div>
+    <div id="referencesFeedback"></div>
+    <div id="referencesProgress">Referências organizadas: 0/4</div>
+
+    <button onclick="closeReferencesGame()">Fechar</button>
+  </div>
+</div>
+
+<div id="finalOverlay">
+  <div id="finalModal">
+    <div id="finalTrophy">🏆</div>
+    <h2>Jornada na APS Concluída</h2>
+    <p>O portfólio foi finalizado com sucesso.</p>
+
+    <div id="finalChecklist">
+      ☑ Considerações finais<br>
+      ☑ Referências<br>
+      ☑ Portfólio pronto para entrega
+    </div>
+
+    <p>Obrigado por participar desta experiência de aprendizagem.</p>
+    <button onclick="closeFinalScreen()">Fechar</button>
+  </div>
+</div>
+
+<div id="game">
+
+
+    <div id="missionBox">
+      <h2>Missões</h2>
+      <div id="missionList"></div>
+    </div>
+
+    <div id="missionCompleteMessage">Missão atualizada!</div>
+
+  <div id="menu" class="screen active">
+
+    <button id="startButton" onclick="openCharacterSelection()">
+      Iniciar
+    </button>
+
+  </div>
+
+  <div id="choose" class="screen">
+
+    <video id="chooseVideo" autoplay muted loop playsinline>
+        <source src="https://res.cloudinary.com/dl0xkz7zp/video/upload/copy_8FF5C040-062D-4BDE-BE7E-0054AAB27ECC_lbnjym.mp4" type="video/mp4">
+    </video>
+
+    <button id="prof1Btn" class="characterHotspot" onclick="choosePlayer('prof1')">
+      Odete
+    </button>
+
+    <button id="prof2Btn" class="characterHotspot" onclick="choosePlayer('prof2')">
+      Katia
+    </button>
+
+</div>
+
+  <div id="map" class="screen">
+    <img id="mapBackground" src="https://i.imgur.com/iS8Vg7q.jpeg">
+
+    <div id="player"></div>
+
+    <div id="hint">Pressione E para entrar</div>
+
+    <div id="collectionStatus"></div>
+
+    <div id="introDialog">
+      <h2>Bem-vindo à Jornada na APS!</h2>
+      <p>
+        Nesta jornada, você irá explorar os principais momentos vividos durante a disciplina,
+        começando pela Unidade Básica de Saúde.
+      </p>
+      <p><strong>Missões iniciais:</strong></p>
+      <p>• Vá até a UBS.</p>
+      <p>• Fale com o Eduardo sobre as Filipetas e complete o desafio.</p>
+      <p>• Converse com o Saulo sobre a série Unidade Básica e faça o quizz.</p>
+      <button onclick="closeIntro()">Começar</button>
+    </div>
+  </div>
+
+  <div id="room" class="screen">
+    <div id="roomTitle"></div>
+
+    <button id="backBtn" onclick="exitRoom()">Voltar ao mapa</button>
+
+    <div id="npcContainer"></div>
+
+    <div id="dialog"></div>
+  </div>
+
+</div>
+
+<script>
+const CHARACTERS = {
+  prof1: {
+    idle: "https://i.imgur.com/YNDa9bu.png",
+    walk1: "https://i.imgur.com/RHTktfe.png",
+    walk2: "https://i.imgur.com/lp13srI.png"
+  },
+
+  prof2: {
+    idle: "https://i.imgur.com/yBmo6jl.png",
+    walk1: "https://i.imgur.com/l9SGG2g.png",
+    walk2: "https://i.imgur.com/EgPi8qA.png"
+  }
+};
+
+// TRILHAS SONORAS
+// Troque estes links pelos links finais das suas músicas.
+// A música do menu toca na seleção de personagem.
+// A música do jogo toca no mapa, UBS, Escola e FM.
+const MENU_MUSIC_SRC = "https://res.cloudinary.com/dl0xkz7zp/video/upload/v1782671111/Nami_the_Tidecaller_Login_Screen_-_League_of_Legends_-_League_of_Legends_youtube_pnvq6g.mp3";
+const GAME_MUSIC_SRC = "https://res.cloudinary.com/dl0xkz7zp/video/upload/v1782738386/Amour_Sucr%C3%A9_Title_Theme_-_H-Pi_youtube_xhy24l.mp3";
+
+const menuMusic = new Audio(MENU_MUSIC_SRC);
+const gameMusic = new Audio(GAME_MUSIC_SRC);
+
+menuMusic.loop = true;
+gameMusic.loop = true;
+
+menuMusic.volume = 0.35;
+gameMusic.volume = 0.0;
+
+function isValidAudio(src) {
+  return src && !src.includes("que issoI");
+}
+
+function playMenuMusic() {
+  if (!isValidAudio(MENU_MUSIC_SRC)) return;
+
+  gameMusic.pause();
+  gameMusic.currentTime = 0;
+  gameMusic.volume = 0;
+
+  menuMusic.volume = 0.35;
+  menuMusic.play().catch(() => {});
+}
+
+function fadeToGameMusic() {
+  if (!isValidAudio(GAME_MUSIC_SRC)) return;
+
+  if (!isValidAudio(MENU_MUSIC_SRC)) {
+    gameMusic.volume = 0.25;
+    gameMusic.play().catch(() => {});
+    return;
+  }
+
+  let menuVolume = menuMusic.volume || 0.35;
+
+  const fadeOut = setInterval(() => {
+    menuVolume -= 0.035;
+    menuMusic.volume = Math.max(0, menuVolume);
+
+    if (menuVolume <= 0) {
+      clearInterval(fadeOut);
+
+      menuMusic.pause();
+      menuMusic.currentTime = 0;
+
+      gameMusic.volume = 0;
+      gameMusic.play().catch(() => {});
+
+      let gameVolume = 0;
+
+      const fadeIn = setInterval(() => {
+        gameVolume += 0.025;
+        gameMusic.volume = Math.min(0.25, gameVolume);
+
+        if (gameVolume >= 0.25) {
+          clearInterval(fadeIn);
+        }
+      }, 45);
+    }
+  }, 45);
+}
+
+const rooms = {
+  UBS: {
+    background: "https://i.imgur.com/10tZfca.jpeg",
+    npcs: [
+      {
+        x: 180,
+        y: 130,
+        image: "https://i.imgur.com/QoYsryW.png",
+        blink: "https://i.imgur.com/KoAKow2.png",
+        minigame: "memory",
+        missionId: "filipetas",
+        text: "Antes de avançar, vamos revisar as filipetas de conceitos da APS. Complete o jogo da memória para coletá-las.",
+        completedText: "Você já completou o jogo das Filipetas."
+      },
+      {
+        x: 420,
+        y: 180,
+        image: "https://i.imgur.com/qqdGZvf.png",
+        blink: "https://i.imgur.com/Sb0nSVr.png",
+        minigame: "quiz",
+        missionId: "talkUBS2",
+        text: "Agora vamos relacionar situações da série Unidade Básica com os atributos da APS. Responda ao quiz para concluir a etapa da UBS.",
+        completedText: "Você já concluiu o quiz dos atributos da APS. A etapa da UBS foi concluída; agora vá para a Escola."
+      }
+    ]
+  },
+
+  Escola: {
+    background: "https://i.imgur.com/r9dRo8m.jpeg",
+    npcs: [
+      {
+        x: 280,
+        y: 160,
+        image: "https://i.imgur.com/r42O7RW.png",
+        blink: "https://i.imgur.com/65TTzRc.png",
+        minigame: "collectMaterials",
+        missionId: "collectEscolaMaterials",
+        text: "Professora, nossa oficina do PSE já está planejada: vamos trabalhar com os alunos da escola a prevenção das arboviroses e cuidados de higiene pessoal. A metodologia vai ser uma atividade prática com demonstração e conversa guiada, mas ainda falta separar os materiais. Você pode nos ajudar a encontrá-los pelo cenário?",
+        completedText: "Você já encontrou os materiais da oficina. Agora podemos realizar a atividade com os alunos."
+      },
+      {
+        x: 560,
+        y: 120,
+        image: "https://i.imgur.com/y5sIWsJ.png",
+        blink: "https://i.imgur.com/rZVBQZL.png",
+        minigame: "album",
+        missionId: "talkEscola2",
+        text: "Professora, depois das oficinas na escola, acabamos bagunçando as fotos do portfólio. Você pode organizar o álbum escolhendo a legenda correta de cada registro?",
+        completedText: "Você já organizou o álbum dos registros da Escola. Agora vá para a Faculdade de Medicina."
+      }
+    ]
+  },
+
+  FM: {
+    background: "https://i.imgur.com/ghZ6CNp.jpeg",
+    npcs: [
+      {
+        x: 250,
+        y: 30,
+        width: 360,
+  	height: 860,
+        image: "https://i.imgur.com/rrE7PSO.png",
+        blink: "https://i.imgur.com/BuVQl7B.png",
+        minigame: "apsFinal",
+        missionId: "talkFM1",
+        nextMissionId: "talkFM2",
+        finalNpc: true,
+        text: "Você chegou à fase final da jornada. Antes de entregar o portfólio, vamos registrar as considerações finais. Clique nas letras de APS e veja os principais aprendizados da disciplina.",
+        referencesText: "Muito bem! As considerações finais foram concluídas. Agora falta apenas organizar as referências do portfólio na biblioteca.",
+        completedText: "Você concluiu as considerações finais e organizou as referências. A Jornada na APS está finalizada!"
+      }
+    ]
+  }
+};
+
+function preloadImages() {
+  const images = [];
+
+  Object.values(CHARACTERS).forEach(character => {
+    images.push(character.idle);
+    images.push(character.walk1);
+    images.push(character.walk2);
+  });
+
+  Object.values(rooms).forEach(room => {
+    images.push(room.background);
+
+    room.npcs.forEach(npc => {
+      images.push(npc.image);
+
+      if (npc.blink) {
+        images.push(npc.blink);
+      }
+    });
+  });
+
+  images.forEach(src => {
+    const img = new Image();
+    img.src = src;
+  });
+}
+
+preloadImages();
+
+let activeNPCs = [];
+let selectedCharacter = null;
+let walkFrame = 0;
+let walkTimer = 0;
+
+let player = document.getElementById("player");
+let hint = document.getElementById("hint");
+
+let x = window.innerWidth / 2;
+let y = window.innerHeight * 0.70;
+
+let speed = 5;
+let currentDoor = null;
+let keys = {};
+
+// Direção lateral usada para espelhar o sprite.
+// Considera que os sprites atuais estão olhando para a direita.
+// Se seus sprites estiverem olhando para a esquerda, troque os sinais em updatePlayerFlip().
+let facingDirection = "right";
+
+
+let introShown = false;
+
+let firstCard = null;
+let secondCard = null;
+let lockMemory = false;
+let matchedPairs = 0;
+let currentMemoryMissionId = null;
+
+const filipetaPairs = [
+  ["Territorialização", "Conhecer o território"],
+  ["Acolhimento", "Escuta qualificada"],
+  ["Equidade", "Reduzir desigualdades"],
+  ["Integralidade", "Cuidado completo"]
+];
+
+function startMemoryGame(missionId = null) {
+  const overlay = document.getElementById("memoryOverlay");
+  const grid = document.getElementById("memoryGrid");
+  const status = document.getElementById("memoryStatus");
+
+  overlay.style.display = "flex";
+  grid.innerHTML = "";
+  currentMemoryMissionId = missionId;
+
+  firstCard = null;
+  secondCard = null;
+  lockMemory = false;
+  matchedPairs = 0;
+
+  status.innerText = "Pares encontrados: 0/" + filipetaPairs.length;
+
+  let cards = [];
+
+  filipetaPairs.forEach((pair, index) => {
+    cards.push({
+      text: pair[0],
+      pairId: index
+    });
+
+    cards.push({
+      text: pair[1],
+      pairId: index
+    });
+  });
+
+  cards.sort(() => Math.random() - 0.5);
+
+  cards.forEach(card => {
+    const cardElement = document.createElement("div");
+
+    cardElement.className = "memoryCard";
+    cardElement.innerText = "?";
+    cardElement.dataset.text = card.text;
+    cardElement.dataset.pairId = card.pairId;
+
+    cardElement.onclick = function() {
+      flipMemoryCard(cardElement);
+    };
+
+    grid.appendChild(cardElement);
+  });
+}
+
+function flipMemoryCard(card) {
+  if (lockMemory) return;
+  if (card.classList.contains("flipped")) return;
+  if (card.classList.contains("matched")) return;
+
+  card.classList.add("flipped");
+  card.innerText = card.dataset.text;
+
+  if (!firstCard) {
+    firstCard = card;
+    return;
+  }
+
+  secondCard = card;
+  lockMemory = true;
+
+  if (firstCard.dataset.pairId === secondCard.dataset.pairId) {
+    firstCard.classList.add("matched");
+    secondCard.classList.add("matched");
+
+    matchedPairs++;
+
+    document.getElementById("memoryStatus").innerText =
+      "Pares encontrados: " + matchedPairs + "/" + filipetaPairs.length;
+
+    firstCard = null;
+    secondCard = null;
+    lockMemory = false;
+
+    if (matchedPairs === filipetaPairs.length) {
+      setTimeout(() => {
+        document.getElementById("memoryStatus").innerText =
+          "Parabéns! Você coletou as filipetas da APS.";
+
+        if (currentMemoryMissionId) {
+          completeMission(currentMemoryMissionId);
+          document.getElementById("dialog").style.display = "none";
+          currentMemoryMissionId = null;
+        }
+      }, 400);
+    }
+  } else {
+    setTimeout(() => {
+      firstCard.classList.remove("flipped");
+      secondCard.classList.remove("flipped");
+
+      firstCard.innerText = "?";
+      secondCard.innerText = "?";
+
+      firstCard = null;
+      secondCard = null;
+      lockMemory = false;
+    }, 900);
+  }
+}
+
+function closeMemoryGame() {
+  document.getElementById("memoryOverlay").style.display = "none";
+}
+
+let quizQuestions = [
+  {
+    question: "Uma família é acompanhada pela mesma equipe ao longo de vários anos.",
+    options: ["Territorialização", "Longitudinalidade", "Equidade", "Integralidade"],
+    answer: "Longitudinalidade"
+  },
+  {
+    question: "A equipe realiza visitas domiciliares e conhece as características da região onde atua.",
+    options: ["Universalidade", "Territorialização", "Participação Social", "Integralidade"],
+    answer: "Territorialização"
+  },
+  {
+    question: "Uma paciente recebe atendimento médico, de enfermagem e acompanhamento social.",
+    options: ["Integralidade", "Equidade", "Regionalização", "Longitudinalidade"],
+    answer: "Integralidade"
+  },
+  {
+    question: "A comunidade participa das decisões sobre ações de saúde do território.",
+    options: ["Participação Social", "Territorialização", "Integralidade", "Equidade"],
+    answer: "Participação Social"
+  },
+  {
+    question: "Pacientes com maiores necessidades recebem maior atenção da equipe.",
+    options: ["Universalidade", "Equidade", "Longitudinalidade", "Participação Social"],
+    answer: "Equidade"
+  },
+  {
+    question: "Todos os moradores têm direito ao acesso aos serviços de saúde.",
+    options: ["Universalidade", "Integralidade", "Territorialização", "Longitudinalidade"],
+    answer: "Universalidade"
+  }
+];
+
+let currentQuizIndex = 0;
+let currentQuizMissionId = null;
+let quizLocked = false;
+
+function startQuizGame(missionId = null) {
+  currentQuizIndex = 0;
+  currentQuizMissionId = missionId;
+  quizLocked = false;
+
+  document.getElementById("quizOverlay").style.display = "flex";
+  showQuizQuestion();
+}
+
+function showQuizQuestion() {
+  const questionData = quizQuestions[currentQuizIndex];
+
+  document.getElementById("quizQuestion").innerText = questionData.question;
+  document.getElementById("quizFeedback").innerText = "";
+  document.getElementById("quizProgress").innerText =
+    "Pergunta " + (currentQuizIndex + 1) + "/" + quizQuestions.length;
+
+  const optionsBox = document.getElementById("quizOptions");
+  optionsBox.innerHTML = "";
+
+  questionData.options.forEach(option => {
+    const btn = document.createElement("button");
+    btn.className = "quizOption";
+    btn.innerText = option;
+
+    btn.onclick = function() {
+      answerQuiz(option, btn);
+    };
+
+    optionsBox.appendChild(btn);
+  });
+}
+
+function answerQuiz(selected, button) {
+  if (quizLocked) return;
+
+  const questionData = quizQuestions[currentQuizIndex];
+  const allButtons = document.querySelectorAll(".quizOption");
+
+  quizLocked = true;
+
+  if (selected === questionData.answer) {
+    button.classList.add("correct");
+    document.getElementById("quizFeedback").innerText = "Correto!";
+  } else {
+    button.classList.add("wrong");
+    document.getElementById("quizFeedback").innerText =
+      "Resposta correta: " + questionData.answer;
+
+    allButtons.forEach(btn => {
+      if (btn.innerText === questionData.answer) {
+        btn.classList.add("correct");
+      }
+    });
+  }
+
+  setTimeout(() => {
+    currentQuizIndex++;
+
+    if (currentQuizIndex < quizQuestions.length) {
+      quizLocked = false;
+      showQuizQuestion();
+    } else {
+      finishQuizGame();
+    }
+  }, 1200);
+}
+
+function finishQuizGame() {
+  document.getElementById("quizQuestion").innerText =
+    "Parabéns! Você identificou os atributos da APS presentes na série Unidade Básica.";
+  document.getElementById("quizOptions").innerHTML = "";
+  document.getElementById("quizFeedback").innerText = "";
+  document.getElementById("quizProgress").innerText = "Quiz concluído.";
+
+  if (currentQuizMissionId) {
+    completeMission(currentQuizMissionId);
+    document.getElementById("dialog").style.display = "none";
+    currentQuizMissionId = null;
+  }
+}
+
+function closeQuizGame() {
+  document.getElementById("quizOverlay").style.display = "none";
+}
+
+
+const schoolMaterials = [
+  { id: "alcoolGel", name: "Álcool em gel", icon: "🧴", x: 120, y: 470 },
+  { id: "luvas", name: "Luvas", icon: "🧤", x: 720, y: 430 },
+  { id: "sabonete", name: "Sabonete", icon: "🧼", x: 430, y: 510 },
+  { id: "maca", name: "Maçã", icon: "🍎", x: 980, y: 390 },
+  { id: "cartazMosquito", name: "Cartaz do mosquito", icon: "🦟", x: 1040, y: 190 },
+  { id: "vasoAreia", name: "Vaso com areia", icon: "🪴", x: 610, y: 250 }
+];
+
+let schoolCollectionActive = false;
+let collectedSchoolMaterials = new Set();
+
+function startSchoolMaterialMission() {
+  schoolCollectionActive = true;
+  collectedSchoolMaterials.clear();
+
+  document.getElementById("dialog").style.display = "none";
+
+  showScreen("map");
+  renderSchoolMaterials();
+  updateCollectionStatus();
+
+  showMissionMessage("Procure os materiais da oficina pela rua!");
+}
+
+function renderSchoolMaterials() {
+  const map = document.getElementById("map");
+
+  document.querySelectorAll(".collectible").forEach(item => item.remove());
+
+  if (!schoolCollectionActive) {
+    document.getElementById("collectionStatus").style.display = "none";
+    return;
+  }
+
+  schoolMaterials.forEach(material => {
+    if (collectedSchoolMaterials.has(material.id)) return;
+
+    const item = document.createElement("div");
+    item.className = "collectible";
+    item.style.left = material.x + "px";
+    item.style.top = material.y + "px";
+    item.innerHTML = `
+      <div class="itemIcon">${material.icon}</div>
+      <div>${material.name}</div>
+    `;
+
+    item.onclick = function() {
+      collectSchoolMaterial(material.id);
+    };
+
+    map.appendChild(item);
+  });
+}
+
+function collectSchoolMaterial(id) {
+  collectedSchoolMaterials.add(id);
+  renderSchoolMaterials();
+  updateCollectionStatus();
+
+  const material = schoolMaterials.find(item => item.id === id);
+
+  if (material) {
+    showMissionMessage(material.name + " coletado!");
+  }
+
+  if (collectedSchoolMaterials.size === schoolMaterials.length) {
+    showMissionMessage("Materiais completos! Volte ao NPC.");
+  }
+}
+
+function updateCollectionStatus() {
+  const status = document.getElementById("collectionStatus");
+
+  if (!schoolCollectionActive) {
+    status.style.display = "none";
+    return;
+  }
+
+  let html = `<strong>Materiais da oficina:</strong><br>`;
+
+  schoolMaterials.forEach(material => {
+    const checked = collectedSchoolMaterials.has(material.id) ? "☑" : "☐";
+    html += `${checked} ${material.name}<br>`;
+  });
+
+  status.innerHTML = html;
+  status.style.display = "block";
+}
+
+function finishSchoolMaterialMission() {
+  schoolCollectionActive = false;
+  document.querySelectorAll(".collectible").forEach(item => item.remove());
+  document.getElementById("collectionStatus").style.display = "none";
+  document.getElementById("dialog").style.display = "none";
+
+  completeMission("collectEscolaMaterials");
+}
+
+
+
+const albumPhotos = [
+  {
+    image: "https://i.imgur.com/Qv5fwla.jpeg",
+    legend: "Preparação dos materiais da oficina."
+  },
+  {
+    image: "https://i.imgur.com/Y65n5ky.jpeg",
+    legend: "Apresentação sobre controle de vetores de arboviroses."
+  },
+  {
+    image: "https://i.imgur.com/U3XXd7Y.jpeg",
+    legend: "Demonstração de higiene pessoal e higienização das mãos."
+  },
+  {
+    image: "https://i.imgur.com/nvhglUD.jpeg",
+    legend: "Participação dos alunos durante a dinâmica educativa."
+  },
+  {
+    image: "https://i.imgur.com/2INSiem.jpeg",
+    legend: "Encerramento da oficina e reflexão sobre a experiência."
+  }
+];
+
+let currentAlbumIndex = 0;
+let currentAlbumMissionId = null;
+let albumLocked = false;
+
+function isRealAlbumImage(src) {
+  return src && !src.includes("COLE_AQUI");
+}
+
+function startAlbumGame(missionId = null) {
+  currentAlbumIndex = 0;
+  currentAlbumMissionId = missionId;
+  albumLocked = false;
+
+  document.getElementById("albumOverlay").style.display = "flex";
+  showAlbumPhoto();
+}
+
+function showAlbumPhoto() {
+  const photo = albumPhotos[currentAlbumIndex];
+  const albumImage = document.getElementById("albumImage");
+  const placeholder = document.getElementById("albumPlaceholder");
+
+  document.getElementById("albumFeedback").innerText = "";
+  document.getElementById("albumProgress").innerText =
+    "Foto " + (currentAlbumIndex + 1) + "/" + albumPhotos.length;
+
+  if (isRealAlbumImage(photo.image)) {
+    albumImage.src = photo.image;
+    albumImage.style.display = "block";
+    placeholder.style.display = "none";
+  } else {
+    albumImage.src = "";
+    albumImage.style.display = "none";
+    placeholder.style.display = "block";
+    placeholder.innerText = "Foto " + (currentAlbumIndex + 1) + " — cole o link no array albumPhotos";
+  }
+
+  const optionsBox = document.getElementById("albumOptions");
+  optionsBox.innerHTML = "";
+
+  const wrongLegends = albumPhotos
+    .filter((item, index) => index !== currentAlbumIndex)
+    .map(item => item.legend)
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 2);
+
+  const options = [photo.legend, ...wrongLegends].sort(() => Math.random() - 0.5);
+
+  options.forEach(option => {
+    const btn = document.createElement("button");
+    btn.className = "albumOption";
+    btn.innerText = option;
+
+    btn.onclick = function() {
+      answerAlbum(option, btn);
+    };
+
+    optionsBox.appendChild(btn);
+  });
+}
+
+function answerAlbum(selected, button) {
+  if (albumLocked) return;
+
+  const photo = albumPhotos[currentAlbumIndex];
+  const allButtons = document.querySelectorAll(".albumOption");
+
+  albumLocked = true;
+
+  if (selected === photo.legend) {
+    button.classList.add("correct");
+    document.getElementById("albumFeedback").innerText = "Legenda correta!";
+  } else {
+    button.classList.add("wrong");
+    document.getElementById("albumFeedback").innerText =
+      "Legenda correta: " + photo.legend;
+
+    allButtons.forEach(btn => {
+      if (btn.innerText === photo.legend) {
+        btn.classList.add("correct");
+      }
+    });
+  }
+
+  setTimeout(() => {
+    currentAlbumIndex++;
+
+    if (currentAlbumIndex < albumPhotos.length) {
+      albumLocked = false;
+      showAlbumPhoto();
+    } else {
+      finishAlbumGame();
+    }
+  }, 1400);
+}
+
+function finishAlbumGame() {
+  document.getElementById("albumImage").style.display = "none";
+  document.getElementById("albumPlaceholder").style.display = "block";
+  document.getElementById("albumPlaceholder").innerText =
+    "Álbum organizado!";
+  document.getElementById("albumCaptionPrompt").innerText =
+    "Os registros da atividade na escola estão prontos para o portfólio.";
+  document.getElementById("albumOptions").innerHTML = "";
+  document.getElementById("albumFeedback").innerText = "";
+  document.getElementById("albumProgress").innerText = "Álbum concluído.";
+
+  if (currentAlbumMissionId) {
+    completeMission(currentAlbumMissionId);
+    document.getElementById("dialog").style.display = "none";
+    currentAlbumMissionId = null;
+  }
+}
+
+function closeAlbumGame() {
+  document.getElementById("albumOverlay").style.display = "none";
+
+  document.getElementById("albumCaptionPrompt").innerText =
+    "Qual legenda combina com esta foto?";
+}
+
+const apsReflections = {
+  A: {
+    title: "A — Atuação",
+    text: "A atuação na Atenção Primária à Saúde vai além do atendimento clínico. Ela envolve acolhimento, escuta, vínculo, promoção da saúde, prevenção de doenças e cuidado contínuo junto à comunidade."
+  },
+  P: {
+    title: "P — Promoção e Prevenção",
+    text: "As atividades do PSE mostraram que a promoção da saúde e a prevenção de agravos podem acontecer por meio da educação em saúde, da participação dos estudantes e de práticas construídas conforme a realidade do território."
+  },
+  S: {
+    title: "S — Saúde Integral",
+    text: "A saúde deve ser compreendida de forma integral, considerando dimensões biológicas, sociais, culturais e emocionais. A experiência aproximou teoria e prática e reforçou a importância do trabalho em equipe."
+  }
+};
+
+let openedAPSLetters = new Set();
+let currentAPSMissionId = null;
+
+function startAPSGame(missionId = null) {
+  currentAPSMissionId = missionId;
+  openedAPSLetters.clear();
+
+  ["A", "P", "S"].forEach(letter => {
+    const btn = document.getElementById("apsLetter" + letter);
+    if (btn) btn.classList.remove("opened");
+  });
+
+  document.getElementById("apsCard").innerHTML = `
+    <h3>Escolha uma letra</h3>
+    <p>Ao abrir A, P e S, as considerações finais serão concluídas.</p>
+  `;
+  document.getElementById("apsProgress").innerText = "Letras abertas: 0/3";
+  document.getElementById("apsOverlay").style.display = "flex";
+}
+
+function openAPSLetter(letter) {
+  const reflection = apsReflections[letter];
+  if (!reflection) return;
+
+  openedAPSLetters.add(letter);
+
+  const btn = document.getElementById("apsLetter" + letter);
+  if (btn) btn.classList.add("opened");
+
+  document.getElementById("apsCard").innerHTML = `
+    <h3>${reflection.title}</h3>
+    <p>${reflection.text}</p>
+  `;
+
+  document.getElementById("apsProgress").innerText =
+    "Letras abertas: " + openedAPSLetters.size + "/3";
+
+  if (openedAPSLetters.size === 3 && currentAPSMissionId) {
+    setTimeout(() => {
+      completeMission(currentAPSMissionId);
+      document.getElementById("dialog").style.display = "none";
+      currentAPSMissionId = null;
+
+      document.getElementById("apsCard").innerHTML = `
+        <h3>Considerações finais concluídas!</h3>
+        <p>Agora falta apenas organizar as referências do portfólio.</p>
+      `;
+      document.getElementById("apsProgress").innerText = "Missão concluída.";
+    }, 500);
+  }
+}
+
+function closeAPSGame() {
+  document.getElementById("apsOverlay").style.display = "none";
+}
+
+const referenceBooks = [
+  {
+    id: "ministerio",
+    title: "Brasil / Ministério da Saúde — Atenção Primária e PSE",
+    correct: true
+  },
+  {
+    id: "unidade",
+    title: "Série Unidade Básica — episódios analisados",
+    correct: true
+  },
+  {
+    id: "starfield",
+    title: "Starfield — atributos da Atenção Primária",
+    correct: true
+  },
+  {
+    id: "materialAula",
+    title: "Materiais e orientações docentes da UDP",
+    correct: true
+  },
+  {
+    id: "receita",
+    title: "Receita de bolo de chocolate",
+    correct: false
+  },
+  {
+    id: "esporte",
+    title: "Revista de notícias esportivas",
+    correct: false
+  }
+];
+
+let selectedReferences = new Set();
+let currentReferencesMissionId = null;
+let referencesLocked = false;
+
+function startReferencesGame(missionId = null) {
+  currentReferencesMissionId = missionId;
+  selectedReferences.clear();
+  referencesLocked = false;
+
+  document.getElementById("referencesOverlay").style.display = "flex";
+  document.getElementById("referencesFeedback").innerText = "";
+  renderReferenceGame();
+}
+
+function renderReferenceGame() {
+  const shelf = document.getElementById("referenceShelf");
+  const options = document.getElementById("referenceOptions");
+
+  shelf.innerHTML = "";
+
+  const selectedCorrect = referenceBooks.filter(book =>
+    book.correct && selectedReferences.has(book.id)
+  );
+
+  if (selectedCorrect.length === 0) {
+    shelf.innerHTML = "<span>📚 Estante vazia</span>";
+  } else {
+    selectedCorrect.forEach(book => {
+      const item = document.createElement("div");
+      item.className = "shelfBook";
+      item.innerText = "📘 " + book.title;
+      shelf.appendChild(item);
+    });
+  }
+
+  options.innerHTML = "";
+
+  referenceBooks.forEach(book => {
+    const btn = document.createElement("button");
+    btn.className = "referenceBook";
+    btn.innerText = book.title;
+
+    if (selectedReferences.has(book.id)) {
+      btn.classList.add("correct");
+      btn.disabled = true;
+    }
+
+    btn.onclick = function() {
+      chooseReferenceBook(book, btn);
+    };
+
+    options.appendChild(btn);
+  });
+
+  document.getElementById("referencesProgress").innerText =
+    "Referências organizadas: " + selectedCorrect.length + "/4";
+}
+
+function chooseReferenceBook(book, button) {
+  if (referencesLocked) return;
+  if (selectedReferences.has(book.id)) return;
+
+  if (book.correct) {
+    selectedReferences.add(book.id);
+    document.getElementById("referencesFeedback").innerText =
+      "Referência adicionada à biblioteca!";
+    renderReferenceGame();
+
+    const selectedCorrectCount = referenceBooks.filter(item =>
+      item.correct && selectedReferences.has(item.id)
+    ).length;
+
+    if (selectedCorrectCount === 4) {
+      referencesLocked = true;
+
+      setTimeout(() => {
+        finishReferencesGame();
+      }, 800);
+    }
+  } else {
+    button.classList.add("wrong");
+    document.getElementById("referencesFeedback").innerText =
+      "Essa fonte não faz parte do portfólio.";
+    setTimeout(() => {
+      button.classList.remove("wrong");
+    }, 900);
+  }
+}
+
+function finishReferencesGame() {
+  document.getElementById("referencesFeedback").innerText =
+    "Biblioteca organizada! As referências foram anexadas ao portfólio.";
+
+  if (currentReferencesMissionId) {
+    completeMission(currentReferencesMissionId);
+    document.getElementById("dialog").style.display = "none";
+    currentReferencesMissionId = null;
+  }
+
+  setTimeout(() => {
+    document.getElementById("referencesOverlay").style.display = "none";
+    showFinalScreen();
+  }, 1200);
+}
+
+function closeReferencesGame() {
+  document.getElementById("referencesOverlay").style.display = "none";
+}
+
+function showFinalScreen() {
+  document.getElementById("finalOverlay").style.display = "flex";
+}
+
+function closeFinalScreen() {
+  document.getElementById("finalOverlay").style.display = "none";
+}
+
+
+let currentStage = "UBS";
+
+const missionStages = {
+  UBS: [
+    {
+      id: "goUBS",
+      text: "Vá até a UBS",
+      done: false
+    },
+    {
+      id: "filipetas",
+      text: "Fale com o Eduardo sobre as Filipetas e complete o desafio.",
+      done: false
+    },
+    {
+      id: "talkUBS2",
+      text: "Converse com o Saulo sobre a série Unidade Básica e faça o quizz.",
+      done: false
+    }
+  ],
+
+  Escola: [
+    {
+      id: "goEscola",
+      text: "Vá até a Escola",
+      done: false
+    },
+    {
+      id: "collectEscolaMaterials",
+      text: "Fale com a Ivani e ajude-a com a oficina de PSE",
+      done: false
+    },
+    {
+      id: "talkEscola2",
+      text: "Fale com o Gabriel e organize o álbum dos registros da Escola",
+      done: false
+    }
+  ],
+
+  FM: [
+    {
+      id: "goFM",
+      text: "Vá até a Faculdade de Medicina",
+      done: false
+    },
+    {
+      id: "talkFM1",
+      text: "Fale com o Samuel sobre as considerações finais",
+      done: false
+    },
+    {
+      id: "talkFM2",
+      text: "Organize as referências na biblioteca",
+      done: false
+    }
+  ]
+};
+
+let missions = missionStages[currentStage];
+let completedMissions = new Set();
+
+function updateMissionPanel() {
+  const missionList = document.getElementById("missionList");
+  if (!missionList) return;
+
+  missionList.innerHTML = "";
+
+  missions.forEach(mission => {
+    const item = document.createElement("div");
+    item.className = "missionItem";
+    item.innerText = (mission.done ? "☑ " : "☐ ") + mission.text;
+
+    if (mission.done) {
+      item.classList.add("missionDone");
+    }
+
+    missionList.appendChild(item);
+  });
+}
+
+function showMissionMessage(text) {
+  const msg = document.getElementById("missionCompleteMessage");
+  if (!msg) return;
+
+  msg.innerText = text;
+  msg.style.display = "block";
+
+  setTimeout(() => {
+    msg.style.display = "none";
+  }, 1300);
+}
+
+function completeMission(id) {
+  const mission = missions.find(m => m.id === id);
+
+  if (mission && !mission.done) {
+    completedMissions.add(id);
+
+    mission.done = true;
+    updateMissionPanel();
+    showMissionMessage("Missão atualizada!");
+
+    if (missions.every(m => m.done)) {
+      if (currentStage === "UBS") {
+        setTimeout(() => {
+          advanceStage("Escola");
+        }, 1400);
+      } else if (currentStage === "Escola") {
+        setTimeout(() => {
+          advanceStage("FM");
+        }, 1400);
+      } else if (currentStage === "FM") {
+        setTimeout(() => {
+          showMissionMessage("Jornada concluída!");
+        }, 1400);
+      }
+    }
+  }
+}
+
+function advanceStage(nextStage) {
+  currentStage = nextStage;
+  missions = missionStages[currentStage];
+  updateMissionPanel();
+
+  if (nextStage === "Escola") {
+    showMissionMessage("UBS concluída! Agora vá para a Escola.");
+  } else if (nextStage === "FM") {
+    showMissionMessage("Escola concluída! Agora vá para a Faculdade de Medicina.");
+  }
+}
+
+function closeIntro() {
+  document.getElementById("introDialog").style.display = "none";
+}
+
+const doors = [
+  {
+    nome: "UBS",
+    xMin: 80,
+    xMax: 330,
+    yMin: 250,
+    yMax: 520
+  },
+  {
+    nome: "Escola",
+    xMin: window.innerWidth / 2 - 150,
+    xMax: window.innerWidth / 2 + 150,
+    yMin: 250,
+    yMax: 520
+  },
+  {
+    nome: "FM",
+    xMin: window.innerWidth - 350,
+    xMax: window.innerWidth - 80,
+    yMin: 250,
+    yMax: 520
+  }
+];
+
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(screen => {
+    screen.classList.remove("active");
+  });
+
+  document.getElementById(id).classList.add("active");
+
+  const missionBox = document.getElementById("missionBox");
+
+  if (id === "map" || id === "room") {
+    missionBox.style.display = "block";
+  } else {
+    missionBox.style.display = "none";
+  }
+}
+
+function openCharacterSelection() {
+  showScreen("choose");
+  playMenuMusic();
+}
+
+function choosePlayer(type) {
+  fadeToGameMusic();
+  selectedCharacter = type;
+  facingDirection = "right";
+  updatePlayerFlip();
+
+  const character = CHARACTERS[selectedCharacter];
+
+  if (character) {
+    player.style.backgroundImage = `url('${character.idle}')`;
+    player.style.backgroundColor = "transparent";
+  }
+
+  showScreen("map");
+  updateMissionPanel();
+
+  if (!introShown) {
+    document.getElementById("introDialog").style.display = "block";
+    introShown = true;
+  }
+}
+
+document.addEventListener("keydown", function(e) {
+  keys[e.key.toLowerCase()] = true;
+
+  if (e.key.toLowerCase() === "e" && currentDoor) {
+    enterRoom(currentDoor);
+  }
+});
+
+document.addEventListener("keyup", function(e) {
+  keys[e.key.toLowerCase()] = false;
+});
+
+function updatePlayerFlip() {
+  if (facingDirection === "left") {
+    player.style.transform = "translateX(-50%) scaleX(-1)";
+  } else {
+    player.style.transform = "translateX(-50%) scaleX(1)";
+  }
+}
+
+function gameLoop() {
+  if (document.getElementById("map").classList.contains("active")) {
+    let isMoving = false;
+
+    if (keys["a"] || keys["arrowleft"]) {
+      x -= speed;
+      facingDirection = "left";
+      isMoving = true;
+    }
+
+    if (keys["d"] || keys["arrowright"]) {
+      x += speed;
+      facingDirection = "right";
+      isMoving = true;
+    }
+
+    updatePlayerFlip();
+
+    if (keys["w"] || keys["arrowup"]) {
+      y -= speed;
+      isMoving = true;
+    }
+
+    if (keys["s"] || keys["arrowdown"]) {
+      y += speed;
+      isMoving = true;
+    }
+
+    const character = CHARACTERS[selectedCharacter];
+
+    if (character) {
+      if (isMoving) {
+        walkTimer++;
+
+        if (walkTimer > 10) {
+          walkFrame = walkFrame === 1 ? 2 : 1;
+          walkTimer = 0;
+        }
+
+        const walkImage = walkFrame === 1 ? character.walk1 : character.walk2;
+
+        if (walkImage && !walkImage.includes("COLE_AQUI")) {
+          player.style.backgroundImage = `url('${walkImage}')`;
+        } else {
+          player.style.backgroundImage = `url('${character.idle}')`;
+        }
+      } else {
+        player.style.backgroundImage = `url('${character.idle}')`;
+        walkFrame = 0;
+        walkTimer = 0;
+      }
+    }
+
+    x = Math.max(20, Math.min(window.innerWidth - 80, x));
+    y = Math.max(250, Math.min(window.innerHeight - 100, y));
+
+    player.style.left = x + "px";
+    player.style.top = y + "px";
+
+    checkDoor();
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+function checkDoor() {
+  currentDoor = null;
+
+  for (let door of doors) {
+    if (
+      x >= door.xMin &&
+      x <= door.xMax &&
+      y >= door.yMin &&
+      y <= door.yMax
+    ) {
+      currentDoor = door.nome;
+      break;
+    }
+  }
+
+  hint.style.display = currentDoor ? "block" : "none";
+}
+
+function enterRoom(place) {
+  document.querySelectorAll(".collectible").forEach(item => item.remove());
+  document.getElementById("collectionStatus").style.display = "none";
+
+  const roomData = rooms[place];
+
+  if (place === "UBS") {
+    completeMission("goUBS");
+  }
+
+  if (place === "Escola") {
+    completeMission("goEscola");
+  }
+
+  if (place === "FM") {
+    completeMission("goFM");
+  }
+
+  document.getElementById("roomTitle").innerText = place;
+  document.getElementById("dialog").style.display = "none";
+
+  const room = document.getElementById("room");
+  room.style.backgroundImage = `url('${roomData.background}')`;
+
+  const npcContainer = document.getElementById("npcContainer");
+  npcContainer.innerHTML = "";
+
+  activeNPCs = [];
+
+roomData.npcs.forEach((npc, index) => {
+  const npcElement = document.createElement("div");
+
+  npcElement.className = "npc";
+  npcElement.id = "npc-" + index;
+  npcElement.dataset.normal = npc.image;
+  npcElement.dataset.blink = npc.blink || npc.image;
+
+  npcElement.style.left = npc.x + "px";
+  npcElement.style.top = npc.y + "px";
+  if (npc.width) {
+  npcElement.style.width = npc.width + "px";
+}
+
+if (npc.height) {
+  npcElement.style.height = npc.height + "px";
+}
+  npcElement.style.backgroundImage = `url('${npc.image}')`;
+
+  npcElement.onclick = function() {
+    if (
+      npc.finalNpc &&
+      completedMissions.has(npc.missionId) &&
+      !completedMissions.has(npc.nextMissionId)
+    ) {
+      talk(npc.referencesText, {
+        minigame: "references",
+        missionId: npc.nextMissionId
+      });
+      return;
+    }
+
+    if (
+      npc.finalNpc &&
+      completedMissions.has(npc.missionId) &&
+      completedMissions.has(npc.nextMissionId) &&
+      npc.completedText
+    ) {
+      talk(npc.completedText);
+      return;
+    }
+
+    if (
+      !npc.finalNpc &&
+      npc.missionId &&
+      completedMissions.has(npc.missionId) &&
+      npc.completedText
+    ) {
+      talk(npc.completedText);
+      return;
+    }
+
+    if (
+      npc.minigame === "collectMaterials" &&
+      schoolCollectionActive &&
+      collectedSchoolMaterials.size === schoolMaterials.length
+    ) {
+      talk(
+        "Perfeito! Agora temos todos os materiais necessários para a oficina sobre controle de vetores de arboviroses e higiene pessoal.",
+        {
+          minigame: "finishCollectMaterials",
+          missionId: npc.missionId
+        }
+      );
+      return;
+    }
+
+    if (
+      npc.minigame === "collectMaterials" &&
+      schoolCollectionActive &&
+      collectedSchoolMaterials.size < schoolMaterials.length
+    ) {
+      talk("Ainda faltam alguns materiais. Continue procurando pelo cenário e volte quando encontrar todos.");
+      return;
+    }
+
+    talk(npc.text, npc);
+
+    if (npc.missionId && !npc.minigame) {
+      completeMission(npc.missionId);
+
+      setTimeout(() => {
+        document.getElementById("dialog").style.display = "none";
+      }, 500);
+    }
+  };
+
+  npcContainer.appendChild(npcElement);
+  activeNPCs.push(npcElement);
+});
+
+  showScreen("room");
+}
+
+function exitRoom() {
+  document.getElementById("dialog").style.display = "none";
+  showScreen("map");
+
+  if (schoolCollectionActive) {
+    renderSchoolMaterials();
+    updateCollectionStatus();
+  }
+}
+
+function talk(text, npc = null) {
+  const dialog = document.getElementById("dialog");
+
+  dialog.innerHTML = `<p>${text}</p>`;
+
+  if (npc && npc.minigame === "memory") {
+    dialog.innerHTML += `
+      <button class="dialogButton" onclick="startMemoryGame('${npc.missionId || ""}')">
+        Iniciar desafio
+      </button>
+    `;
+  }
+
+  if (npc && npc.minigame === "quiz") {
+    dialog.innerHTML += `
+      <button class="dialogButton" onclick="startQuizGame('${npc.missionId || ""}')">
+        Iniciar quiz
+      </button>
+    `;
+  }
+
+  if (npc && npc.minigame === "collectMaterials") {
+    dialog.innerHTML += `
+      <button class="dialogButton" onclick="startSchoolMaterialMission()">
+        Procurar materiais
+      </button>
+    `;
+  }
+
+  if (npc && npc.minigame === "album") {
+    dialog.innerHTML += `
+      <button class="dialogButton" onclick="startAlbumGame('${npc.missionId || ""}')">
+        Organizar álbum
+      </button>
+    `;
+  }
+
+  if (npc && npc.minigame === "apsFinal") {
+    dialog.innerHTML += `
+      <button class="dialogButton" onclick="startAPSGame('${npc.missionId || ""}')">
+        Abrir letras APS
+      </button>
+    `;
+  }
+
+  if (npc && npc.minigame === "references") {
+    dialog.innerHTML += `
+      <button class="dialogButton" onclick="startReferencesGame('${npc.missionId || ""}')">
+        Organizar biblioteca
+      </button>
+    `;
+  }
+
+  if (npc && npc.minigame === "finishCollectMaterials") {
+    dialog.innerHTML += `
+      <button class="dialogButton" onclick="finishSchoolMaterialMission()">
+        Entregar materiais
+      </button>
+    `;
+  }
+
+  dialog.style.display = "block";
+}
+
+setInterval(() => {
+  if (!document.getElementById("room").classList.contains("active")) return;
+  if (activeNPCs.length === 0) return;
+
+  const npcsWithBlink = activeNPCs.filter(npc => {
+    return npc.dataset.blink && npc.dataset.blink !== npc.dataset.normal;
+  });
+
+  if (npcsWithBlink.length === 0) return;
+
+  const randomNPC = npcsWithBlink[Math.floor(Math.random() * npcsWithBlink.length)];
+
+  randomNPC.style.backgroundImage = `url('${randomNPC.dataset.blink}')`;
+
+  setTimeout(() => {
+    if (document.getElementById("room").classList.contains("active")) {
+      randomNPC.style.backgroundImage = `url('${randomNPC.dataset.normal}')`;
+    }
+  }, 120);
+
+}, 3000);
+
+gameLoop();
+</script>
+
+</body>
+</html>

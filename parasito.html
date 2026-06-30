@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Desafio de Parasitologia – Abas</title>
+  <style>
+    :root{
+      --bg:#08111f; --card:#111827; --text:#f9fafb; --muted:#cbd5e1;
+      --accent:#22c55e; --accent2:#38bdf8; --wrong:#ef4444; --border:#334155; --tab:#020617;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at top,#1e3a5f,var(--bg));color:var(--text);line-height:1.5}
+    header{padding:28px 18px 16px;text-align:center}
+    h1{margin:0;font-size:2rem}.subtitle{color:var(--muted);margin-top:8px}
+    .wrap{max-width:1050px;margin:auto;padding:12px 16px 60px}
+    .topbar{position:sticky;top:0;z-index:5;background:rgba(8,17,31,.94);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:16px;padding:12px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px}
+    .progress{flex:1;min-width:220px;height:12px;background:#020617;border-radius:999px;overflow:hidden;border:1px solid var(--border)}
+    .bar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:.3s}.score{font-weight:700}
+    .tabs{
+  display:flex;
+  justify-content:center;
+  padding:10px 0 14px;
+}
+    .tab-btn{white-space:nowrap;border:1px solid var(--border);background:var(--tab);color:var(--text);border-radius:999px;padding:10px 14px;font-weight:750;cursor:pointer}
+    .tab-btn.active{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#03111f;border-color:transparent}
+    .tab-content{display:none}.tab-content.active{display:block}
+    .card{background:linear-gradient(180deg,rgba(31,41,55,.96),rgba(17,24,39,.96));border:1px solid var(--border);border-radius:20px;padding:20px;margin:12px 0 18px;box-shadow:0 12px 30px rgba(0,0,0,.25)}
+    .phase{display:inline-block;padding:5px 10px;border-radius:999px;background:#020617;border:1px solid var(--border);color:#bfdbfe;font-size:.9rem;margin-bottom:8px}
+    h2{margin:6px 0 10px;font-size:1.35rem}
+    .intro{color:var(--muted);background:rgba(2,6,23,.35);border:1px solid var(--border);border-radius:14px;padding:12px;margin:10px 0 16px}
+    .question{padding:14px;border:1px solid var(--border);border-radius:14px;background:rgba(2,6,23,.35);margin:12px 0}
+    .qtext{font-weight:700;margin-bottom:10px}
+    button,.choice{cursor:pointer;border:none;border-radius:12px;padding:10px 14px;font-weight:700;color:var(--text);background:#334155;margin:4px;transition:.15s}
+    button:hover,.choice:hover{transform:translateY(-1px);filter:brightness(1.1)}
+    .choice.correct{background:var(--accent);color:#03111f}.choice.wrong{background:var(--wrong)}
+    input[type="text"]{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:#020617;color:var(--text);font-size:1rem;margin-top:8px}
+    .mini{color:var(--muted);font-size:.92rem}.feedback{margin-top:8px;font-weight:650}.ok{color:#86efac}.bad{color:#fca5a5}
+    .pill{display:inline-block;padding:7px 10px;border:1px solid var(--border);border-radius:999px;background:#020617;margin:4px}
+    .section-title{margin-top:20px;color:#bfdbfe;font-size:1.05rem;font-weight:800;border-left:4px solid var(--accent2);padding-left:10px}
+    .checkbox-row label{display:block;background:#020617;border:1px solid var(--border);border-radius:12px;padding:10px;margin:8px 0;cursor:pointer}
+    .image-box{width:100%;min-height:220px;border:1px dashed #64748b;border-radius:14px;background:#020617;display:flex;align-items:center;justify-content:center;overflow:hidden;margin:10px 0;color:#94a3b8;text-align:center;padding:12px}
+    .image-box img{width:100%;max-height:300px;object-fit:contain;display:block}
+    .edit-note{border:1px solid #38bdf8;background:rgba(56,189,248,.08);border-radius:14px;padding:12px;color:#dbeafe;margin:12px 0}
+    code{background:#020617;border:1px solid var(--border);border-radius:6px;padding:2px 5px}
+    .footer-actions{text-align:center;margin-top:26px}
+    .result{text-align:center;padding:24px;border-radius:20px;background:#020617;border:1px solid var(--border);display:none;margin-top:18px}
+    @media(max-width:700px){h1{font-size:1.55rem}.card{padding:16px}button,.choice{width:100%;margin:5px 0}.tabs{top:92px}}
+  </style>
+</head>
+<body>
+<header>
+  <h1>Prática de Parasitologia</h1>
+  <div class="subtitle">Treino prático de identificação por imagem</div>
+</header>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="progress"><div class="bar" id="bar"></div></div>
+    <div class="score">Pontuação: <span id="score">0</span>/<span id="total">0</span></div>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab-btn active" onclick="openTab('pratica', this)">🔬 Prática</button>
+  </nav>
+
+  <section id="pratica" class="tab-content active">
+    <div class="card">
+      <span class="phase">Prática</span>
+      <h2>Identificação por imagem</h2>
+      <div id="pratica-imgs"></div>
+    </div>
+  </section>
+
+  <div class="footer-actions">
+    <button onclick="finishGame()">Finalizar jogo</button>
+    <button onclick="resetGame()">Recomeçar</button>
+  </div>
+  <div class="result" id="result"></div>
+</div>
+
+<script>
+let score = 0, answered = 0, total = 0;
+const answeredIds = new Set();
+
+function normalize(s){return (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim();}
+function shuffleArray(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
+function mark(id, points){if(answeredIds.has(id))return false;answeredIds.add(id);answered++;score+=points;updateScore();return true;}
+function updateScore(){document.getElementById("score").textContent=score;document.getElementById("total").textContent=total;document.getElementById("bar").style.width=total?Math.round((answered/total)*100)+"%":"0%";}
+function openTab(tabId, btn){document.querySelectorAll(".tab-content").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".tab-btn").forEach(x=>x.classList.remove("active"));document.getElementById(tabId).classList.add("active");btn.classList.add("active");window.scrollTo({top:0,behavior:"smooth"});}
+
+function makeChoiceQuestion(container,id,text,options,correctIndex,explanation=""){
+  total++;
+  const div=document.createElement("div");div.className="question";div.innerHTML=`<div class="qtext">${text}</div>`;
+  const btns=[]; const indexedOptions=shuffleArray(options.map((op,originalIndex)=>({op,originalIndex})));
+  indexedOptions.forEach((item)=>{
+    const b=document.createElement("button");b.className="choice";b.textContent=item.op;
+    b.onclick=()=>{if(answeredIds.has(id))return;btns.forEach(x=>x.disabled=true);
+      if(item.originalIndex===correctIndex){b.classList.add("correct");mark(id,1);fb.innerHTML=`<span class="ok">✅ Correto!</span> ${explanation}`;}
+      else{b.classList.add("wrong");const correctShownIndex=indexedOptions.findIndex(x=>x.originalIndex===correctIndex);if(correctShownIndex>=0)btns[correctShownIndex].classList.add("correct");mark(id,0);fb.innerHTML=`<span class="bad">❌ Incorreto.</span> ${explanation}`;}
+    };
+    btns.push(b);div.appendChild(b);
+  });
+  const fb=document.createElement("div");fb.className="feedback";div.appendChild(fb);container.appendChild(div);
+}
+function makeVF(container,id,text,correctBool,explanation=""){makeChoiceQuestion(container,id,text,["V","F"],correctBool?0:1,explanation);}
+function makeInput(container,id,label,accepted,hint=""){
+  total++;
+  const div=document.createElement("div");div.className="question";div.innerHTML=`<div class="qtext">${label}</div><div class="mini">${hint}</div>`;
+  const input=document.createElement("input");input.type="text";input.placeholder="Digite aqui...";
+  const b=document.createElement("button");b.textContent="Conferir";const fb=document.createElement("div");fb.className="feedback";
+  b.onclick=()=>{if(answeredIds.has(id))return;const ans=normalize(input.value);const ok = accepted.some(a =>
+  ans === normalize(a)
+);input.disabled=true;b.disabled=true;if(ok){mark(id,1);fb.innerHTML=`<span class="ok">✅ Aceito!</span>`;}else{mark(id,0);fb.innerHTML=`<span class="bad">❌ Não foi aceito.</span> Resposta esperada: <span class="pill">${accepted[0]}</span>`;}};
+  div.appendChild(input);div.appendChild(b);div.appendChild(fb);container.appendChild(div);
+}
+function makeMultiCheck(container,id,text,options,correctSet){
+  total++;
+  const div=document.createElement("div");div.className="question";div.innerHTML=`<div class="qtext">${text}</div>`;
+  const box=document.createElement("div");box.className="checkbox-row";
+  options.forEach((op,i)=>{const lab=document.createElement("label");lab.innerHTML=`<input type="checkbox" value="${i}"> ${op}`;box.appendChild(lab);});
+  const b=document.createElement("button");b.textContent="Conferir";const fb=document.createElement("div");fb.className="feedback";
+  b.onclick=()=>{if(answeredIds.has(id))return;const selected=[...box.querySelectorAll("input:checked")].map(x=>Number(x.value)).sort().join(",");const correct=[...correctSet].sort().join(",");box.querySelectorAll("input").forEach(x=>x.disabled=true);b.disabled=true;if(selected===correct){mark(id,1);fb.innerHTML=`<span class="ok">✅ Correto!</span>`;}else{mark(id,0);fb.innerHTML=`<span class="bad">❌ Incorreto.</span> Resposta esperada: ${[...correctSet].map(i=>options[i]).join("; ")}.`;}};
+  div.appendChild(box);div.appendChild(b);div.appendChild(fb);container.appendChild(div);
+}
+function makeImageQuestion(container,q){
+  const div=document.createElement("div");div.className="question";
+  const imageHtml=q.img?`<div class="image-box"><img src="${q.img}" alt="${q.title}"></div>`:`<div class="image-box">nao sei se tem<br><span class="mini">imagem micro no lab <code>img: ""</code> em <code>const practicalQuestions</code></span></div>`;
+  div.innerHTML=`<div class="qtext">${q.title}</div>${imageHtml}`;
+  const nameDiv=document.createElement("div");div.appendChild(nameDiv);
+  makeInput(nameDiv,q.id+"-nome","1) Identifique o parasita, forma ou vetor:",q.acceptedName,"");
+  const featDiv=document.createElement("div");div.appendChild(featDiv);
+  if(q.multi){makeMultiCheck(featDiv,q.id+"-carac","2) Quais características justificam essa identificação?",q.features,new Set(q.correctFeatures));}
+  else{makeChoiceQuestion(featDiv,q.id+"-carac","2) Qual característica mais ajuda a identificar?",q.features,q.correctFeatures[0]);}
+  container.appendChild(div);
+}
+
+const practicalQuestions = [
+
+/* ================= GIARDIA ================= */
+
+{
+  id:"pr1",
+  title:"Micro 1",
+  img:"https://i.imgur.com/eOBqWF4.jpeg",
+  acceptedName:["trofozoito de giardia","trofozoito de giardia lamblia"],
+  multi:true,
+  features:[
+    "Formato piriforme (em pêra)",
+    "Dois núcleos lembrando olhos",
+    "Disco ventral adesivo",
+    "Cisto com parede espessa",
+    "Forma intracelular em macrófagos"
+  ],
+  correctFeatures:[0,1,2]
+},
+
+{
+  id:"pr2",
+  title:"Micro 2",
+  img:"https://i.imgur.com/R4rnDbx.jpeg",
+  acceptedName:["cisto de giardia","cisto de giardia lamblia"],
+  multi:true,
+  features:[
+    "Forma oval",
+    "Parede espessa",
+    "Até 4 núcleos",
+    "Forma móvel com flagelos",
+    "Parasita intracelular"
+  ],
+  correctFeatures:[0,1,2]
+},
+
+/* ================= ENTAMOEBA ================= */
+
+{
+  id:"pr3",
+  title:"Micro 3",
+  img:"https://i.imgur.com/Qxh8sOi.jpeg",
+  acceptedName:["trofozoito de entamoeba histolytica","Trofozoito de E. histolytica"],
+  multi:true,
+  features:[
+    "Presença de hemácias fagocitadas",
+    "Pseudópodes",
+    "Citoplasma granular",
+    "Núcleo em roda de carroça",
+    "Formato em C no sangue"
+  ],
+  correctFeatures:[0,1,2,3]
+},
+
+{
+  id:"pr4",
+  title:"Micro 4",
+  img:"https://i.imgur.com/VrjIVa7.jpeg",
+  acceptedName:["cisto de entamoeba coli","cisto de E. coli"],
+  multi:true,
+  features:[
+    "Forma esférica",
+    "Tem até 8 núcleos",
+    "Membrana dupla",
+    "Dois núcleos simétricos tipo giardia",
+    "Formato em C no sangue"
+  ],
+  correctFeatures:[0,1,2]
+},
+
+/* ================= TRICHOMONAS ================= */
+
+{
+  id:"pr5",
+  title:"Micro 5",
+  img:"https://i.imgur.com/zQDxWmr.jpeg",
+  acceptedName:["trichomonas","trichomonas vaginalis", "trofozoito de trichomonas vaginalis"],
+  multi:true,
+  features:[
+    "Flagelado",
+    "Membrana ondulante",
+    "4 flagelos",
+    "Axóstilo",
+    "Presença de Hidrogenossomos"
+  ],
+  correctFeatures:[0,1,2,3,4]
+},
+
+/* ================= FLEBOTOMÍNEO ================= */
+
+{
+  id:"pr6",
+  title:"Micro 6",
+  img:"https://i.imgur.com/lqXdtYU.jpeg",
+  acceptedName:["flebótomo macho","flebotomo macho","mosquito palha macho", "flebotomineo macho", "macho de flebotomineo", "macho"],
+  multi:true,
+  features:[
+    "Aparelho bucal curto por ser não hematofago",
+    "Se alimenta de seiva/açúcar",
+    "Asa pilosa",
+    "Defeca durante alimentação sanguínea",
+    "Possui estrutura no final do abdomen em forma de gancho"
+  ],
+  correctFeatures:[0,1,4]
+},
+
+{
+  id:"pr7",
+  title:"Micro 7",
+  img:"https://i.imgur.com/xuFf36E.jpeg",
+  acceptedName:["femea de flebotomineo","flebotomo femea","mosquito palha femea", "femea de flebotomo", "femea"],
+  multi:true,
+  features:[
+    "Aparelho bucal mais longo por ser hematófaga",
+    "Abdomen arredondado",
+    "Asas pilosas",
+    "Não se alimenta de sangue",
+    "Parasita intracelular"
+  ],
+  correctFeatures:[0,1,2]
+},
+
+/* ================= BARBEIRO ================= */
+
+{
+  id:"pr8",
+  title:"Micro 8",
+  img:"https://i.imgur.com/G143aab.jpeg",
+  acceptedName:["barbeiro hematofago","hematofago"],
+  multi:true,
+  features:[
+    "Aparelho bucal RETO",
+    "Com 3 segmentos",
+    "Curto",
+    "Longo",
+    "Aparelho bucal CURVO"
+  ],
+  correctFeatures:[0,1,2]
+},
+
+{
+  id:"pr81",
+  title:"Micro 8.1",
+  img:"https://i.imgur.com/sTpMUtt.jpeg",
+  acceptedName:["barbeiro predador","predador"],
+  multi:true,
+  features:[
+    "Aparelho bucal RETO",
+    "Com 3 segmentos",
+    "Com 4 segmentos",
+    "Aparelho bucal CURVO",
+    "Curto"
+  ],
+  correctFeatures:[1,3,4]
+},
+
+{
+  id:"pr82",
+  title:"Micro 8.2",
+  img:"https://i.imgur.com/qadGl5L.jpeg",
+  acceptedName:["barbeiro fitofago","fitofago"],
+  multi:true,
+  features:[
+    "Aparelho bucal RETO",
+    "Com 3 segmentos",
+    "Com 4 segmentos",
+    "Aparelho bucal CURVO",
+    "Longo"
+  ],
+  correctFeatures:[0,2,4]
+},
+
+
+/* ================= LEISHMANIA ================= */
+
+{
+  id:"pr9",
+  title:"Micro 9",
+  img:"https://i.imgur.com/v0yOKGc.jpeg",
+  acceptedName:["promastigota de leishmania","promastigota"],
+  multi:true,
+  features:[
+    "Forma extracelular",
+    "Flagelo duplo",
+    "Cinetoplasto anterior e mais distante do nucleo",
+    "Dentro de macrófagos",
+    "Sem flagelo"
+  ],
+  correctFeatures:[0,2]
+},
+
+{
+  id:"pr10",
+  title:"Micro 10",
+  img:"https://i.imgur.com/EYbOJiw.jpeg",
+  acceptedName:["amastigota de leishmania","amastigota"],
+  multi:true,
+  features:[
+    "Forma intracelular",
+    "Dentro de macrófagos",
+    "Arredondada",
+    "Forma alongada no sangue",
+    "Disco ventral"
+  ],
+  correctFeatures:[0,1,2]
+},
+
+/* ================= TRYPANOSOMA CRUZI ================= */
+
+{
+  id:"pr11",
+  title:"Micro 11",
+  img:"https://i.imgur.com/sIXatc5.jpeg",
+  acceptedName:["tripomastigota de cruzi","Tripomastigota de Trypanosoma cruzi", "tripomastigota"],
+  multi:true,
+  features:[
+    "Forma em C ou S",
+    "Presente no sangue",
+    "Cinetoplasto evidente e posterior(na extremidade)",
+    "Dentro de macrófagos",
+    "Forma cística"
+  ],
+  correctFeatures:[0,1,2]
+},
+
+{
+  id:"pr12",
+  title:"Micro 12",
+  img:"https://i.imgur.com/5pjdvDa.jpeg",
+  acceptedName:["epimastigota de trypanosoma cruzi","epimastigota de cruzi", "epimastigota"],
+  multi:true,
+  features:[
+    "Forma encontrada no vetor",
+    "Cinetoplasto anterior e proximo ao nucleo",
+    "Flagelado",
+    "Forma intracelular humana",
+    "Cisto resistente"
+  ],
+  correctFeatures:[0,1,2]
+},
+
+/* ================= TOXOPLASMA GONDII ================= */
+
+{
+  id:"pr13",
+  title:"Micro 13",
+  img:"https://i.imgur.com/98Lnwz9.jpeg",
+  acceptedName:["taquizoito de toxoplasma gondii","taquizoito","toxoplasma gondii"],
+  multi:true,
+  features:[
+    "Forma em arco/banana",
+    "Forma de multiplicação rápida: 'taqui'",
+    "Pode estar livre ou dentro de células",
+    "Forma cística tecidual de multiplicação lenta",
+    "Parasita intraeritrocitário"
+  ],
+  correctFeatures:[0,1,2]
+},
+
+{
+  id:"pr14",
+  title:"Micro 14",
+  img:"https://i.imgur.com/ELTCCDO.jpeg",
+  acceptedName:["bradizoito de toxoplasma gondii","bradizoito","cisto tecidual","toxoplasma gondii"],
+  multi:true,
+  features:[
+    "Forma de multiplicação lenta 'bradi'",
+    "Encontrado em cistos teciduais",
+    "Cistos com muitos bradizoitos",
+    "Forma livre no sangue em fase aguda",
+    "Forma intraeritrocitária em anel"
+  ],
+  correctFeatures:[0,1,2]
+},
+
+/* ================= PLASMODIUM – FORMAS ================= */
+
+{
+  id:"pr15",
+  title:"Micro 15",
+  img:"https://i.imgur.com/PMdQQ0I.jpeg",
+  acceptedName:["trofozoito jovem de Plasmodium","trofozoito imaturo de Plasmodium"],
+  multi:true,
+  features:[
+    "Parasita dentro da hemácia",
+    "Aspecto de anel 'de sinete'",
+    "Citoplasma fino com ponto de cromatina",
+    "Forma flagelada extracelular",
+    "Cinetoplasto evidente"
+  ],
+  correctFeatures:[0,1,2]
+},
+
+{
+  id:"pr151",
+  title:"Micro 15.1",
+  img:"https://i.imgur.com/VgvwLhL.jpeg",
+  acceptedName:["trofozoito maduro de Plasmodium","maduro de plasmodium"],
+  multi:true,
+  features:[
+    "Forma irregular/ameboide",
+    "Cistoplasma mais denso",
+    "Presença de hemozoína",
+    "Forma flagelada extracelular",
+    "Cinetoplasto evidente"
+  ],
+  correctFeatures:[0,1,2]
+},
+
+
+{
+  id:"pr16",
+  title:"Micro 16",
+  img:"https://i.imgur.com/tXsnXOf.jpeg",
+  acceptedName:["esquizonte de plasmodium"],
+  multi:true,
+  features:[
+    "Hemácia contendo múltiplos merozoítos",
+    "Granulações maláricas",
+    "Pode romper a hemácia liberando merozoítos",
+    "Forma cística intestinal",
+    "Forma com disco ventral adesivo"
+  ],
+  correctFeatures:[0,1,2]
+},
+
+{
+  id:"pr17",
+  title:"",
+  img:"https://i.imgur.com/qniWweD.jpeg",
+  acceptedName:["gametocito de plasmodium"],
+  multi:true,
+  features:[
+    "Forma sexual do Plasmodium",
+    "Granulaçoes maláricas",
+    "Em P. falciparum pode ter aspecto em lua crescente/banana",
+    "Forma amastigota dentro de macrófagos",
+    "Forma com membrana ondulante"
+  ],
+  correctFeatures:[0,1,2]
+},
+
+{
+  id:"pr171",
+  title:"Micro 17.1",
+  img:"https://i.imgur.com/DQ2OfBn.jpeg",
+  acceptedName:["plasmodium vivax maduro","trofozoito maduro de plasmodium vivax","trofozoito maduro de vivax"],
+  multi:true,
+  features:[
+    "Hemácita parasitada em forma ameboide",
+    "Granulações de Shuffner",
+    "Em P. falciparum pode ter aspecto em lua crescente/banana",
+    "Forma amastigota dentro de macrófagos",
+    "Forma com membrana ondulante"
+  ],
+  correctFeatures:[0,1]
+},
+
+/* ================= COCCÍDEOS – CYSTOISOSPORA BELLI E CRYPTOSPORIDIUM PARVUM ================= */
+
+{
+  id:"pr18",
+  title:"Micro 18",
+  img:"https://i.imgur.com/Nu2dnMd.jpeg",
+  acceptedName:["cystoisospora belli","isospora belli","oocisto de cistoisospora belli"],
+  multi:true,
+  features:[
+    "Oocisto ovalado/elíptico",
+    "Maior que oocistos de Cryptosporidium",
+    "Pode ser evidenciado por coloração ácido-resistente modificada",
+    "Parasita intraeritrocitário",
+    "Forma em C no sangue"
+  ],
+  correctFeatures:[0,1,2]
+},
+
+{
+  id:"pr19",
+  title:"Micro 19",
+  img:"https://i.imgur.com/9SUyMMV.jpeg",
+  acceptedName:["cryptosporidium parvum","cryptosporidium","oocisto de cryptosporidium"],
+  multi:true,
+  features:[
+    "Oocistos pequenos e arredondados",
+    "Pode ser evidenciado por coloração ácido-resistente modificada",
+    "Associado a diarreia aquosa, especialmente grave em imunossuprimidos",
+    "Oocisto grande e ovalado como Cystoisospora",
+    "Trofozoíto piriforme com dois núcleos"
+  ],
+  correctFeatures:[0,1,2]
+}
+
+];
+
+const pratica = document.getElementById("pratica-imgs");
+practicalQuestions.forEach(q => makeImageQuestion(pratica,q));
+
+updateScore();
+
+function finishGame(){
+  const pct=total?Math.round((score/total)*100):0;
+  const res=document.getElementById("result");
+  let msg="Continue revisando ciclos, formas infectantes, vetores, diagnóstico e tratamento.";
+  if(pct>=85)msg="Excelente! Você está muito forte para a prova.";
+  else if(pct>=65)msg="Bom desempenho! Revise principalmente o que errou.";
+  else if(pct>=45)msg="Base em construção: foque em ciclo, forma infectante, diagnóstico e manifestações clínicas.";
+  res.style.display="block";
+  res.innerHTML=`<h2>Resultado final</h2><p class="score">${score}/${total} pontos (${pct}%)</p><p>${msg}</p>`;
+  res.scrollIntoView({behavior:"smooth"});
+}
+function resetGame(){location.reload();}
+</script>
+</body>
+</html>

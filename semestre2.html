@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2º Semestre - Calculadoras UnB</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    h1 {
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+    p {
+      color: #444;
+      margin-bottom: 30px;
+    }
+    .menu {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+    }
+    .card {
+      background: white;
+      padding: 25px;
+      width: 200px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-decoration: none;
+      color: #333;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .card span {
+      font-size: 45px;
+      margin-bottom: 10px;
+    }
+    a.voltar {
+      display: inline-block;
+      margin-top: 40px;
+      text-decoration: none;
+      color: #007BFF;
+      font-weight: bold;
+      font-size: 1em;
+    }
+    a.voltar:hover {
+      text-decoration: underline;
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      body { padding: 30px 10px; }
+      h1 { font-size: 1.6em; }
+      .card { width: 100%; max-width: 300px; }
+      .card span { font-size: 40px; }
+    }
+  </style>
+</head>
+<body>
+  <h1>📘 2º Semestre</h1>
+  <p>Escolha a disciplina:</p>
+
+  <div class="menu">
+    <a href="morfo2.html" class="card">
+      <span>🫁</span>
+      <strong>Morfologia 2</strong>
+    </a>
+
+    <a href="sus.html" class="card">
+      <span>🏥</span>
+      <strong>SUS</strong>
+    </a>
+
+    <a href="psicomed2.html" class="card">
+      <span>🧠</span>
+      <strong>PsicoMed 2</strong>
+    </a>
+  </div>
+
+  <a href="index.html" class="voltar">&larr; Voltar ao menu principal</a>
+</body>
+</html>
+
